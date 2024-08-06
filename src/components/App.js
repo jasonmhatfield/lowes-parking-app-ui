@@ -7,7 +7,6 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Lowes Parking App</h1>
       <Simulation />
       <Alerts userEmail={userEmail} />
     </div>
