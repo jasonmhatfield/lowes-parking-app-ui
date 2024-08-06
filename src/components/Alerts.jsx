@@ -42,9 +42,9 @@ const Alerts = ({ userEmail }) => {
   return (
     <div>
       <h2>Alerts</h2>
-      <ul>
+      <ul data-testid="alerts-list">
         {alerts.map((alert, index) => (
-          <li key={index}>{alert.message}</li>
+          <li key={index} data-testid="alert-item">{alert.message}</li>
         ))}
       </ul>
     </div>
