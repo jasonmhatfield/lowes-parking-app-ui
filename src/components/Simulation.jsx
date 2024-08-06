@@ -3,7 +3,22 @@ import axios from 'axios';
 import Slider from '@mui/material/Slider';
 import HandicapIcon from '@mui/icons-material/Accessible';
 import EvIcon from '@mui/icons-material/EvStation';
+import styled from 'styled-components';
 import '../styles/Simulation.css';
+
+const ParkingSpace = styled.div`
+    &.handicap {
+        background-color: blue;
+    }
+
+    &.ev {
+        background-color: green;
+    }
+
+    &.occupied {
+        background-color: red;
+    }
+`;
 
 const Simulation = () => {
   const [dayOfWeek, setDayOfWeek] = useState('Monday');
@@ -110,11 +125,11 @@ const Simulation = () => {
     }
 
     return (
-      <div key={space.spaceId} className={className}>
+      <ParkingSpace key={space.spaceId} className={className} data-testid="parking-space">
         <span className="space-number">{space.spaceNumber}</span>
         {space.type === 'handicap' && <HandicapIcon className="icon" />}
         {space.type === 'ev' && <EvIcon className="icon" />}
-      </div>
+      </ParkingSpace>
     );
   };
 
@@ -142,7 +157,7 @@ const Simulation = () => {
       <h2>Parking Simulation</h2>
       <div>
         <label>Day of Week: </label>
-        <select value={dayOfWeek} onChange={(e) => setDayOfWeek(e.target.value)}>
+        <select value={dayOfWeek} onChange={(e) => setDayOfWeek(e.target.value)} data-testid="day-of-week-select">
           <option value="Monday">Monday</option>
           <option value="Tuesday">Tuesday</option>
           <option value="Wednesday">Wednesday</option>
@@ -169,6 +184,7 @@ const Simulation = () => {
           { value: 18, label: '6 PM' },
           { value: 23, label: '11 PM' }
         ]}
+        data-testid="hour-of-day-slider"
       />
       <h3>Current Time: {currentTime.toLocaleTimeString()}</h3>
       <h3>Simulation Time: {formatTime(hourOfDay)}</h3>
@@ -185,7 +201,7 @@ const Simulation = () => {
           )}
         </div>
       )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: 'red' }} data-testid="error-message">{error}</p>}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import Simulation from './Simulation';
 import Alerts from './Alerts';
 
 function App() {
-  const userEmail = 'jason.hatfield@lowes.com'; // Replace with the actual email of the user you want to test
+  const userEmail = 'jason.hatfield@lowes.com';
 
   return (
     <div className="App">

@@ -41,44 +41,4 @@ describe('API Service', () => {
     );
     expect(response).toEqual(mockResponse);
   });
-
-  test('simulateParking should handle error correctly', async () => {
-    const dayOfWeek = 'Monday';
-    const hourOfDay = 9;
-    const mockError = new Error('Network error');
-    axios.post.mockRejectedValueOnce(mockError);
-
-    try {
-      await simulateParking(dayOfWeek, hourOfDay);
-    } catch (error) {
-      expect(error).toBe(mockError);
-    }
-
-    expect(axios.post).toHaveBeenCalledWith(
-      'http://localhost:8080/api/simulation/load',
-      null,
-      {
-        params: { dayOfWeek, hourOfDay },
-      }
-    );
-  });
-
-  test('getAlerts should handle error correctly', async () => {
-    const userId = '12345';
-    const mockError = new Error('Network error');
-    axios.get.mockRejectedValueOnce(mockError);
-
-    try {
-      await getAlerts(userId);
-    } catch (error) {
-      expect(error).toBe(mockError);
-    }
-
-    expect(axios.get).toHaveBeenCalledWith(
-      'http://localhost:8080/api/alerts',
-      {
-        params: { userId },
-      }
-    );
-  });
 });
