@@ -38,6 +38,10 @@
     background-color: #99ff99;
 }
 
+.time-slider {
+    max-width: 100%;
+}
+
 .icon {
     font-size: 20px;
 }

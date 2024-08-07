@@ -7,25 +7,24 @@ import styled from 'styled-components';
 import '../styles/Simulation.css';
 
 const ParkingSpace = styled.div`
-    &.handicap {
-        background-color: blue;
-    }
+  &.handicap {
+    background-color: blue;
+  }
 
-    &.ev {
-        background-color: green;
-    }
+  &.ev {
+    background-color: green;
+  }
 
-    &.occupied {
-        background-color: red;
-    }
+  &.occupied {
+    background-color: rgba(216, 2, 2, 0.8);
+  }
 `;
 
-const Simulation = () => {
+const Simulation = ({ gates }) => {
   const [dayOfWeek, setDayOfWeek] = useState('Monday');
   const [hourOfDay, setHourOfDay] = useState(7);
   const [parkingSpaces, setParkingSpaces] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [sliderTimeout, setSliderTimeout] = useState(null);
   const [error, setError] = useState(null);
 
@@ -41,14 +40,9 @@ const Simulation = () => {
       setLoading(true);
       setSliderTimeout(setTimeout(() => {
         updateSimulation(dayOfWeek, hourOfDay);
-      }, 2000));
+      }, 500));
     }
   }, [dayOfWeek, hourOfDay]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const resetAndLoadSimulation = async (day, hour) => {
     try {
@@ -125,84 +119,85 @@ const Simulation = () => {
     }
 
     return (
-      <ParkingSpace key={space.spaceId} className={className} data-testid="parking-space">
-        <span className="space-number">{space.spaceNumber}</span>
-        {space.type === 'handicap' && <HandicapIcon className="icon" />}
-        {space.type === 'ev' && <EvIcon className="icon" />}
-      </ParkingSpace>
+        <ParkingSpace key={space.spaceId} className={className} data-testid="parking-space">
+          <span className="space-number">{space.spaceNumber}</span>
+          {space.type === 'handicap' && <HandicapIcon className="icon" />}
+          {space.type === 'ev' && <EvIcon className="icon" />}
+        </ParkingSpace>
     );
   };
 
   const renderFloor = (floorSpaces, floorNumber) => {
     return (
-      <div key={floorNumber} className="parking-floor">
-        <h4>Floor {floorNumber}</h4>
-        <div className="floor-spaces">
-          {floorSpaces.map(renderParkingSpace)}
+        <div key={floorNumber} className="parking-floor">
+          <h4>Floor {floorNumber}</h4>
+          <div className="floor-spaces">
+            {floorSpaces.map(renderParkingSpace)}
+          </div>
         </div>
-      </div>
     );
   };
 
   const renderParkingStructure = () => {
     const spacesByFloor = groupSpacesByFloor(parkingSpaces);
     return Object.entries(spacesByFloor).map(([floorNumber, floorSpaces]) =>
-      renderFloor(floorSpaces, floorNumber)
+        renderFloor(floorSpaces, floorNumber)
     );
   };
 
   return (
-    <div>
-      <h1>Lowes Parking App</h1>
-      <h2>Parking Simulation</h2>
       <div>
-        <label>Day of Week: </label>
-        <select value={dayOfWeek} onChange={(e) => setDayOfWeek(e.target.value)} data-testid="day-of-week-select">
-          <option value="Monday">Monday</option>
-          <option value="Tuesday">Tuesday</option>
-          <option value="Wednesday">Wednesday</option>
-          <option value="Thursday">Thursday</option>
-          <option value="Friday">Friday</option>
-          <option value="Saturday">Saturday</option>
-          <option value="Sunday">Sunday</option>
-        </select>
-      </div>
-      <br />
-      <label>Hour of Day: </label>
-      <Slider
-        value={hourOfDay}
-        onChange={handleSliderChange}
-        min={0}
-        max={23}
-        step={1}
-        valueLabelDisplay="auto"
-        valueLabelFormat={formatTime}
-        marks={[
-          { value: 0, label: 'Midnight' },
-          { value: 6, label: '6 AM' },
-          { value: 12, label: 'Noon' },
-          { value: 18, label: '6 PM' },
-          { value: 23, label: '11 PM' }
-        ]}
-        data-testid="hour-of-day-slider"
-      />
-      <h3>Current Time: {currentTime.toLocaleTimeString()}</h3>
-      <h3>Simulation Time: {formatTime(hourOfDay)}</h3>
-      <h3>Percentage Occupied: {getPercentageOccupied()}%</h3>
-      <h3>Simulation Results</h3>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="parking-structure">
-          {parkingSpaces.length === 0 ? (
-            <p>No data available.</p>
-          ) : (
-            renderParkingStructure()
-          )}
+        <h2>Parking Simulation</h2>
+        <div>
+          <label>Day of Week: </label>
+          <select value={dayOfWeek} onChange={(e) => setDayOfWeek(e.target.value)} data-testid="day-of-week-select">
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+          </select>
         </div>
-      )}
-      {error && <p style={{ color: 'red' }} data-testid="error-message">{error}</p>}
-    </div>
+        <br />
+        <label>Hour of Day: </label>
+        <Slider className="time-slider"
+                value={hourOfDay}
+                onChange={handleSliderChange}
+                min={0}
+                max={23}
+                step={1}
+                valueLabelDisplay="auto"
+                valueLabelFormat={formatTime}
+                marks={[
+                  { value: 0, label: '12 AM' },
+                  { value: 6, label: '6 AM' },
+                  { value: 12, label: 'Noon' },
+                  { value: 18, label: '6 PM' },
+                  { value: 23, label: '11 PM' }
+                ]}
+                data-testid="hour-of-day-slider"
+        />
+        <h3>Time of Day: {formatTime(hourOfDay)}</h3>
+        <h3>Percentage Occupied: {getPercentageOccupied()}%</h3>
+        {loading ? (
+            <p>Loading...</p>
+        ) : (
+            <div className="parking-structure">
+              {parkingSpaces.length === 0 ? (
+                  <p>No data available.</p>
+              ) : (
+                  renderParkingStructure()
+              )}
+            </div>
+        )}
+        {error && <p style={{ color: 'red' }} data-testid="error-message">{error}</p>}
+        <h3>Gate Status</h3>
+        {gates.map(gate => (
+            <p key={gate.gateId}>{gate.gateName}: {gate.isOperational ? 'Open' : 'Closed'}</p>
+        ))}
+      </div>
   );
 };
 
