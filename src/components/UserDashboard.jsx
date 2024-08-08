@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import AccessibleIcon from '@mui/icons-material/Accessible';
+import ElectricCarIcon from '@mui/icons-material/ElectricCar';
+import LocalParkingIcon from '@mui/icons-material/LocalParking';
 
 const UserDashboard = ({ currentUser, onLogout }) => {
   const [gates, setGates] = useState([]);
@@ -64,6 +70,30 @@ const UserDashboard = ({ currentUser, onLogout }) => {
     }
   };
 
+  const isSpotDisabled = (spot) => {
+    if (spot.isOccupied && spot.userId !== currentUser.id) {
+      return true;
+    }
+    if (spot.type === 'handicap' && !currentUser.hasHandicapPlacard) {
+      return true;
+    }
+    return spot.type === 'ev' && !currentUser.hasEv;
+
+  };
+
+  const getSpotIcon = (spot) => {
+    if (spot.id === (parkedLocation ? parkedLocation.id : null)) {
+      return <DirectionsCarIcon />;
+    }
+    if (spot.type === 'handicap') {
+      return <AccessibleIcon />;
+    }
+    if (spot.type === 'ev') {
+      return <ElectricCarIcon />;
+    }
+    return <LocalParkingIcon />;
+  };
+
   return (
     <div>
       <h2>User Dashboard</h2>
@@ -77,13 +107,18 @@ const UserDashboard = ({ currentUser, onLogout }) => {
 
       <h3>Available Parking Spots</h3>
       {parkingSpots.map(spot => (
-        <button
-          key={spot.id}
-          onClick={() => spot.userId === currentUser.id ? handleLeave() : handlePark(spot.id)}
-          disabled={(spot.isOccupied && spot.userId !== currentUser.id) || (parkedLocation && spot.userId !== currentUser.id)}
-        >
-          {spot.userId === currentUser.id ? 'Leave' : `${spot.spotNumber} - ${spot.isOccupied ? 'Occupied' : 'Available'}`}
-        </button>
+        <Tooltip key={spot.id} title={`${spot.spotNumber} - ${spot.isOccupied ? 'Occupied' : 'Available'}`}>
+          <span>
+            <Button
+              onClick={() => (parkedLocation && spot.id === parkedLocation.id) ? handleLeave() : handlePark(spot.id)}
+              disabled={parkedLocation ? (spot.id !== parkedLocation.id) : isSpotDisabled(spot)}
+              variant="contained"
+              color={spot.isOccupied ? "secondary" : "primary"}
+            >
+              {getSpotIcon(spot)}
+            </Button>
+          </span>
+        </Tooltip>
       ))}
 
       {notification && <p>{notification}</p>}
