@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Typography, Button, Snackbar, Box, Paper } from '@mui/material';
 
 const UserDashboard = ({ currentUser, onLogout }) => {
   const [gates, setGates] = useState([]);
@@ -10,13 +9,21 @@ const UserDashboard = ({ currentUser, onLogout }) => {
 
   useEffect(() => {
     const fetchGates = async () => {
-      const response = await axios.get('/api/gates');
-      setGates(response.data);
+      try {
+        const response = await axios.get('http://localhost:8080/gates');
+        setGates(response.data);
+      } catch (error) {
+        console.error('Error fetching gates:', error);
+      }
     };
 
     const fetchParkingSpots = async () => {
-      const response = await axios.get('/api/parking-spots');
-      setParkingSpots(response.data);
+      try {
+        const response = await axios.get('http://localhost:8080/parkingSpots');
+        setParkingSpots(response.data);
+      } catch (error) {
+        console.error('Error fetching parking spots:', error);
+      }
     };
 
     fetchGates();
@@ -25,52 +32,55 @@ const UserDashboard = ({ currentUser, onLogout }) => {
 
   const handlePark = async (spotId) => {
     try {
-      const response = await axios.post(`/api/parking-spots/${spotId}/park`, { userId: currentUser.userId });
+      const response = await axios.patch(`http://localhost:8080/parkingSpots/${spotId}`, { isOccupied: true, userId: currentUser.id });
       setParkedLocation(response.data);
       setNotification('Parked successfully.');
     } catch (error) {
       setNotification('Error parking the car.');
+      console.error('Error parking the car:', error);
     }
   };
 
   const handleLeave = async () => {
     try {
-      await axios.post(`/api/parking-spots/${parkedLocation.spotId}/leave`, { userId: currentUser.userId });
+      await axios.patch(`http://localhost:8080/parkingSpots/${parkedLocation.id}`, { isOccupied: false, userId: null });
       setParkedLocation(null);
       setNotification('Left the parking spot.');
     } catch (error) {
       setNotification('Error leaving the parking spot.');
+      console.error('Error leaving the parking spot:', error);
     }
   };
 
   return (
-    <Container>
-      <Typography variant="h4">User Dashboard</Typography>
-      <Button onClick={onLogout} variant="contained" color="primary">Logout</Button>
+    <div>
+      <h2>User Dashboard</h2>
+      <p>Welcome, {currentUser.firstName} {currentUser.lastName}</p>
+      <button onClick={onLogout}>Logout</button>
 
-      <Typography variant="h6">Parking Gate Status</Typography>
+      <h3>Parking Gate Status</h3>
       {gates.map(gate => (
-        <Typography key={gate.gateId}>{gate.gateName}: {gate.isOperational ? 'Open' : 'Closed'}</Typography>
+        <p key={gate.id}>{gate.gateName}: {gate.isOperational ? 'Open' : 'Closed'}</p>
       ))}
 
-      <Typography variant="h6">Available Parking Spots</Typography>
+      <h3>Available Parking Spots</h3>
       {parkingSpots.map(spot => (
-        <Button key={spot.spotId} onClick={() => handlePark(spot.spotId)} disabled={spot.isOccupied}>
+        <button key={spot.id} onClick={() => handlePark(spot.id)} disabled={spot.isOccupied}>
           {spot.spotNumber} - {spot.isOccupied ? 'Occupied' : 'Available'}
-        </Button>
+        </button>
       ))}
 
       {parkedLocation && (
         <>
-          <Typography variant="h6">Your Parked Location</Typography>
-          <Typography>Level: {parkedLocation.level}</Typography>
-          <Typography>Space: {parkedLocation.spaceNumber}</Typography>
-          <Button onClick={handleLeave} variant="contained" color="secondary">Leave Spot</Button>
+          <h3>Your Parked Location</h3>
+          <p>Level: {parkedLocation.level}</p>
+          <p>Space: {parkedLocation.spaceNumber}</p>
+          <button onClick={handleLeave}>Leave Spot</button>
         </>
       )}
 
-      {notification && <Snackbar open message={notification} onClose={() => setNotification('')} />}
-    </Container>
+      {notification && <p>{notification}</p>}
+    </div>
   );
 };
 
