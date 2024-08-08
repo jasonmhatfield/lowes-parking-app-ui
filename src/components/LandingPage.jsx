@@ -9,7 +9,7 @@ const LandingPage = ({ onSelectUser }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/users');
+        const response = await axios.get('http://localhost:8080/api/users');
         setUsers(response.data);
       } catch (error) {
         console.error('Error fetching users:', error);

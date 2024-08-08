@@ -3,12 +3,12 @@
     {
       "id": "1",
       "gateName": "North Gate",
-      "isOperational": true
+      "isOperational": false
     },
     {
       "id": "2",
       "gateName": "South Gate",
-      "isOperational": false
+      "isOperational": true
     }
   ],
   "parkingSpots": [
@@ -96,10 +96,10 @@
     {
       "id": "10",
       "spotNumber": "E2",
-      "isOccupied": false,
+      "isOccupied": true,
       "level": 3,
       "spaceNumber": 302,
-      "userId": null,
+      "userId": "2",
       "type": "regular"
     }
   ],

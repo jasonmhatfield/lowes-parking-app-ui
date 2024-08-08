@@ -5,6 +5,7 @@ import EditUserModal from '../modals/EditUserModal';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon, LockOpen as LockOpenIcon, Lock as LockIcon } from '@mui/icons-material';
+import { useAlert } from '../context/AlertContext';
 
 const AdminDashboard = ({ currentUser, onLogout }) => {
   const [gates, setGates] = useState([]);
@@ -15,11 +16,12 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     const fetchGates = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/gates');
+        const response = await axios.get('http://localhost:8080/api/gates');
         setGates(response.data);
       } catch (error) {
         console.error('Error fetching gates:', error);
@@ -29,7 +31,7 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/users');
+        const response = await axios.get('http://localhost:8080/api/users');
         setUsers(response.data.filter(user => user.role !== 'admin'));
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -43,9 +45,14 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
 
   const toggleGateStatus = async (gateId, currentStatus) => {
     try {
-      const response = await axios.patch(`http://localhost:8080/gates/${gateId}`, { isOperational: !currentStatus });
+      const response = await axios.patch(`http://localhost:8080/api/gates/${gateId}`, null, {
+        params: { isOperational: !currentStatus },
+      });
       const updatedGate = response.data;
       setGates(prevGates => prevGates.map(gate => gate.id === gateId ? updatedGate : gate));
+      if (!updatedGate.isOperational) {
+        showAlert(`Gate ${updatedGate.gateName} is now closed.`);
+      }
     } catch (error) {
       console.error('Failed to update gate status:', error);
       setError('Failed to update gate status.');
@@ -54,7 +61,7 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
 
   const handleAddUser = async (user) => {
     try {
-      const response = await axios.post('http://localhost:8080/users', user);
+      const response = await axios.post('http://localhost:8080/api/users', user);
       setUsers([...users, response.data]);
     } catch (error) {
       console.error('Error adding user:', error);
@@ -64,7 +71,7 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
 
   const handleEditUser = async (updatedUser) => {
     try {
-      const response = await axios.put(`http://localhost:8080/users/${updatedUser.id}`, updatedUser);
+      const response = await axios.put(`http://localhost:8080/api/users/${updatedUser.id}`, updatedUser);
       setUsers(users.map(user => user.id === updatedUser.id ? response.data : user));
     } catch (error) {
       console.error('Error updating user:', error);
@@ -74,7 +81,7 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:8080/users/${userId}`);
+      await axios.delete(`http://localhost:8080/api/users/${userId}`);
       setUsers(users.filter(user => user.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -124,7 +131,7 @@ const AdminDashboard = ({ currentUser, onLogout }) => {
       <Button variant="contained" color="primary" onClick={() => setAddUserModalOpen(true)}>Add User</Button>
       {users.map(user => (
         <div key={user.id}>
-          <p>{user.firstName} {user.lastName} - {user.role}</p>
+          <p>{user.firstName} {user.lastName}</p>
           <IconButton onClick={() => { setUserToEdit(user); setEditUserModalOpen(true); }}>
             <EditIcon />
           </IconButton>
