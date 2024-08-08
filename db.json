@@ -2,13 +2,13 @@
   "gates": [
     {
       "id": "1",
-      "gateName": "Main Gate",
+      "gateName": "North Gate",
       "isOperational": true
     },
     {
       "id": "2",
       "gateName": "South Gate",
-      "isOperational": true
+      "isOperational": false
     }
   ],
   "parkingSpots": [
@@ -18,47 +18,89 @@
       "isOccupied": false,
       "level": 1,
       "spaceNumber": 101,
-      "userId": null
+      "userId": null,
+      "type": "handicap"
     },
     {
       "id": "2",
       "spotNumber": "A2",
-      "isOccupied": true,
+      "isOccupied": false,
       "level": 1,
       "spaceNumber": 102,
-      "userId": "3"
+      "userId": null,
+      "type": "handicap"
     },
     {
       "id": "3",
       "spotNumber": "B1",
       "isOccupied": false,
-      "level": 2,
-      "spaceNumber": 201,
-      "userId": null
+      "level": 1,
+      "spaceNumber": 103,
+      "userId": null,
+      "type": "ev"
     },
     {
       "id": "4",
       "spotNumber": "B2",
       "isOccupied": false,
-      "level": 2,
-      "spaceNumber": 202,
-      "userId": null
+      "level": 1,
+      "spaceNumber": 104,
+      "userId": null,
+      "type": "ev"
     },
     {
       "id": "5",
       "spotNumber": "C1",
       "isOccupied": false,
-      "level": 3,
-      "spaceNumber": 301,
-      "userId": null
+      "level": 2,
+      "spaceNumber": 201,
+      "userId": null,
+      "type": "ev"
     },
     {
       "id": "6",
       "spotNumber": "C2",
       "isOccupied": false,
+      "level": 2,
+      "spaceNumber": 202,
+      "userId": null,
+      "type": "regular"
+    },
+    {
+      "id": "7",
+      "spotNumber": "D1",
+      "isOccupied": false,
+      "level": 2,
+      "spaceNumber": 203,
+      "userId": null,
+      "type": "regular"
+    },
+    {
+      "id": "8",
+      "spotNumber": "D2",
+      "isOccupied": false,
+      "level": 2,
+      "spaceNumber": 204,
+      "userId": null,
+      "type": "regular"
+    },
+    {
+      "id": "9",
+      "spotNumber": "E1",
+      "isOccupied": false,
+      "level": 3,
+      "spaceNumber": 301,
+      "userId": null,
+      "type": "regular"
+    },
+    {
+      "id": "10",
+      "spotNumber": "E2",
+      "isOccupied": false,
       "level": 3,
       "spaceNumber": 302,
-      "userId": null
+      "userId": null,
+      "type": "regular"
     }
   ],
   "users": [
@@ -67,28 +109,36 @@
       "firstName": "Jason",
       "lastName": "Hatfield",
       "email": "jason.hatfield@lowes.com",
-      "role": "admin"
+      "role": "admin",
+      "hasEv": false,
+      "hasHandicapPlacard": false
     },
     {
       "id": "2",
       "firstName": "John",
       "lastName": "Doe",
       "email": "john.doe@lowes.com",
-      "role": "employee"
+      "role": "employee",
+      "hasEv": false,
+      "hasHandicapPlacard": false
     },
     {
       "id": "3",
       "firstName": "Jane",
       "lastName": "Smith",
       "email": "jane.smith@lowes.com",
-      "role": "employee"
+      "role": "employee",
+      "hasEv": true,
+      "hasHandicapPlacard": false
     },
     {
       "id": "4",
       "firstName": "Alice",
       "lastName": "Johnson",
       "email": "alice.johnson@lowes.com",
-      "role": "employee"
+      "role": "employee",
+      "hasEv": false,
+      "hasHandicapPlacard": true
     }
   ]
 }
