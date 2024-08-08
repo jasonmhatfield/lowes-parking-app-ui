@@ -15,26 +15,50 @@
     {
       "id": "1",
       "spotNumber": "A1",
-      "isOccupied": true,
+      "isOccupied": false,
       "level": 1,
       "spaceNumber": 101,
-      "userId": "2"
+      "userId": null
     },
     {
       "id": "2",
       "spotNumber": "A2",
-      "isOccupied": false,
+      "isOccupied": true,
       "level": 1,
       "spaceNumber": 102,
-      "userId": null
+      "userId": "3"
     },
     {
       "id": "3",
       "spotNumber": "B1",
-      "isOccupied": true,
+      "isOccupied": false,
       "level": 2,
       "spaceNumber": 201,
-      "userId": 1
+      "userId": null
+    },
+    {
+      "id": "4",
+      "spotNumber": "B2",
+      "isOccupied": false,
+      "level": 2,
+      "spaceNumber": 202,
+      "userId": null
+    },
+    {
+      "id": "5",
+      "spotNumber": "C1",
+      "isOccupied": false,
+      "level": 3,
+      "spaceNumber": 301,
+      "userId": null
+    },
+    {
+      "id": "6",
+      "spotNumber": "C2",
+      "isOccupied": false,
+      "level": 3,
+      "spaceNumber": 302,
+      "userId": null
     }
   ],
   "users": [
@@ -50,6 +74,20 @@
       "firstName": "John",
       "lastName": "Doe",
       "email": "john.doe@lowes.com",
+      "role": "employee"
+    },
+    {
+      "id": "3",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "email": "jane.smith@lowes.com",
+      "role": "employee"
+    },
+    {
+      "id": "4",
+      "firstName": "Alice",
+      "lastName": "Johnson",
+      "email": "alice.johnson@lowes.com",
       "role": "employee"
     }
   ]
