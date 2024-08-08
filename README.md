@@ -1,5 +1,77 @@
-markdown
-Copy code
+## MVP Features
+### Landing Page
+- User Login Selection: Display a list of users that can log in.
+- Button for each user to log in as either Admin or Employee.
+### User Dashboard (Employee)
+- Gate Status: View the status of all parking gates (Open/Closed).
+- Parking Availability: View available parking spots.
+- Parking Simulation:
+  - Simulate parking in a spot.
+  - Receive notifications when parking is limited or full.
+  - Simulate leaving a parking spot.
+  - Parking Location: View current parking location (Level and Space).
+- Logout: Log out and return to the landing page.
+
+
+### Admin Dashboard
+- Manage Users:
+  - View list of users.
+  - Add new users.
+  - Edit existing users.
+  - Delete users.
+  - Manage Gates: Update the status of parking gates (Open/Closed).
+  -  Logout: Log out and return to the landing page.
+  
+Components 
+- LandingPage: User selection for login.
+- UserDashboard: Dashboard for employees with parking functionalities.
+- AdminDashboard: Dashboard for admin with user and gate management functionalities.
+- Alerts: Component to display notifications.
+- ConfirmationModal: Modal for confirming actions (e.g., deleting a user).
+- AddUserModal: Modal for adding new users.
+- EditUserModal: Modal for editing existing users.
+- GateList: List of gates with status and toggle functionality.
+- ParkingSimulation: Component for simulating parking actions.
+
+```
+src/
+|-- components/
+|   |-- LandingPage.jsx
+|   |-- UserDashboard.jsx
+|   |-- AdminDashboard.jsx
+|   |-- Alerts.jsx
+|   |-- ConfirmationModal.jsx
+|   |-- AddUserModal.jsx
+|   |-- EditUserModal.jsx
+|   |-- GateList.jsx
+|   |-- ParkingSimulation.jsx
+|-- services/
+|   |-- api.js
+|-- App.jsx
+|-- index.js
+```
+### Step-by-Step Implementation
+1. Set up the basic structure of the app in App.jsx with routing.
+2. Implement the LandingPage component:
+   - Display a list of users to log in as. 
+   - Handle user selection and navigation to the appropriate dashboard.
+3. Create the UserDashboard component:
+   - Display gate status and available parking spots.
+   - Implement parking simulation functionalities.
+   - Show notifications for parking status.
+   - Include logout functionality.
+4. Create the AdminDashboard component:
+   - Display list of users.
+   - Implement functionalities to add, edit, and delete users.
+   - Display gate list and allow updating gate status.
+   - Include logout functionality.
+5. Develop the Alerts component to show notifications.
+6. Create the ConfirmationModal component for action confirmations.
+7. Develop AddUserModal and EditUserModal components for user management.
+8. Implement the GateList component to manage gate statuses.
+9. Create the ParkingSimulation component for simulating parking actions.\
+
+---
 # Getting Started with Lowes Parking App UI
 
 This project is the front-end for the Lowes Parking App, bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

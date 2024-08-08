@@ -1,0 +1,56 @@
+{
+  "gates": [
+    {
+      "id": "1",
+      "gateName": "Main Gate",
+      "isOperational": true
+    },
+    {
+      "id": "2",
+      "gateName": "South Gate",
+      "isOperational": true
+    }
+  ],
+  "parkingSpots": [
+    {
+      "id": "1",
+      "spotNumber": "A1",
+      "isOccupied": true,
+      "level": 1,
+      "spaceNumber": 101,
+      "userId": "2"
+    },
+    {
+      "id": "2",
+      "spotNumber": "A2",
+      "isOccupied": false,
+      "level": 1,
+      "spaceNumber": 102,
+      "userId": null
+    },
+    {
+      "id": "3",
+      "spotNumber": "B1",
+      "isOccupied": true,
+      "level": 2,
+      "spaceNumber": 201,
+      "userId": 1
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "firstName": "Jason",
+      "lastName": "Hatfield",
+      "email": "jason.hatfield@lowes.com",
+      "role": "admin"
+    },
+    {
+      "id": "2",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@lowes.com",
+      "role": "employee"
+    }
+  ]
+}
