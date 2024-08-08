@@ -56,14 +56,19 @@ const EditUserModal = ({ open, onClose, user, onSave, onChange, currentUser, fet
     setSelectedPass(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const handleSavePass = async () => {
-    if (!selectedPass) return;
+  const handleSave = async () => {
+    if (!user) return;
 
     try {
-      await axios.put(`http://localhost:8080/api/passes/${selectedPass.passId}`, selectedPass);
-      alert("Parking pass updated successfully.");
+      await axios.put(`http://localhost:8080/api/users/${user.userId}`, user);
+
+      if (selectedPass) {
+        await axios.put(`http://localhost:8080/api/passes/${selectedPass.passId}`, selectedPass);
+      }
+
+      onSave();
     } catch (error) {
-      console.error('Error updating parking pass:', error);
+      console.error('Error saving user or parking pass:', error);
     }
   };
 
@@ -126,13 +131,12 @@ const EditUserModal = ({ open, onClose, user, onSave, onChange, currentUser, fet
                   shrink: true,
                 }}
               />
-              <Button onClick={handleSavePass} color="primary">Save Pass</Button>
             </>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} color="primary">Cancel</Button>
-          <Button onClick={onSave} color="primary">Save</Button>
+          <Button onClick={handleSave} color="primary">Save</Button>
           <Button onClick={handleDeleteUser} color="secondary">Delete</Button>
         </DialogActions>
       </Dialog>
