@@ -21,6 +21,12 @@ const UserDashboard = ({ currentUser, onLogout }) => {
       try {
         const response = await axios.get('http://localhost:8080/parkingSpots');
         setParkingSpots(response.data);
+
+        // Check if the current user is already parked and set the parkedLocation state
+        const parkedSpot = response.data.find(spot => spot.userId === currentUser.id);
+        if (parkedSpot) {
+          setParkedLocation(parkedSpot);
+        }
       } catch (error) {
         console.error('Error fetching parking spots:', error);
       }
@@ -28,12 +34,15 @@ const UserDashboard = ({ currentUser, onLogout }) => {
 
     fetchGates();
     fetchParkingSpots();
-  }, []);
+  }, [currentUser.id]);
 
   const handlePark = async (spotId) => {
     try {
       const response = await axios.patch(`http://localhost:8080/parkingSpots/${spotId}`, { isOccupied: true, userId: currentUser.id });
       setParkedLocation(response.data);
+      setParkingSpots(prevSpots => prevSpots.map(spot =>
+        spot.id === spotId ? { ...spot, isOccupied: true, userId: currentUser.id } : spot
+      ));
       setNotification('Parked successfully.');
     } catch (error) {
       setNotification('Error parking the car.');
@@ -44,6 +53,9 @@ const UserDashboard = ({ currentUser, onLogout }) => {
   const handleLeave = async () => {
     try {
       await axios.patch(`http://localhost:8080/parkingSpots/${parkedLocation.id}`, { isOccupied: false, userId: null });
+      setParkingSpots(prevSpots => prevSpots.map(spot =>
+        spot.id === parkedLocation.id ? { ...spot, isOccupied: false, userId: null } : spot
+      ));
       setParkedLocation(null);
       setNotification('Left the parking spot.');
     } catch (error) {
@@ -65,19 +77,14 @@ const UserDashboard = ({ currentUser, onLogout }) => {
 
       <h3>Available Parking Spots</h3>
       {parkingSpots.map(spot => (
-        <button key={spot.id} onClick={() => handlePark(spot.id)} disabled={spot.isOccupied}>
-          {spot.spotNumber} - {spot.isOccupied ? 'Occupied' : 'Available'}
+        <button
+          key={spot.id}
+          onClick={() => spot.userId === currentUser.id ? handleLeave() : handlePark(spot.id)}
+          disabled={(spot.isOccupied && spot.userId !== currentUser.id) || (parkedLocation && spot.userId !== currentUser.id)}
+        >
+          {spot.userId === currentUser.id ? 'Leave' : `${spot.spotNumber} - ${spot.isOccupied ? 'Occupied' : 'Available'}`}
         </button>
       ))}
-
-      {parkedLocation && (
-        <>
-          <h3>Your Parked Location</h3>
-          <p>Level: {parkedLocation.level}</p>
-          <p>Space: {parkedLocation.spaceNumber}</p>
-          <button onClick={handleLeave}>Leave Spot</button>
-        </>
-      )}
 
       {notification && <p>{notification}</p>}
     </div>
