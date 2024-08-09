@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Modal, Box, TextField, Button } from '@mui/material';
 
-const AddUserModal = ({ open, onClose, onSave }) => {
-  const [user, setUser] = useState({
+const AddUserModal = ({ onClose, onSave }) => {
+  const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
     email: '',
@@ -13,63 +12,30 @@ const AddUserModal = ({ open, onClose, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setUser((prevUser) => ({
-      ...prevUser,
+    setNewUser({
+      ...newUser,
       [name]: type === 'checkbox' ? checked : value,
-    }));
+    });
   };
 
   const handleSave = () => {
-    onSave(user);
+    onSave(newUser);
     onClose();
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={{ p: 4, backgroundColor: 'white', margin: 'auto', marginTop: '10%', width: 400 }}>
-        <h2>Add User</h2>
-        <TextField
-          label="First Name"
-          name="firstName"
-          value={user.firstName}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Last Name"
-          name="lastName"
-          value={user.lastName}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Email"
-          name="email"
-          value={user.email}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <label>
-          <input type="checkbox" name="hasHandicapPlacard" checked={user.hasHandicapPlacard} onChange={handleChange} />
-          Handicap Placard
-        </label>
-        <label>
-          <input type="checkbox" name="hasEv" checked={user.hasEv} onChange={handleChange} />
-          Electric Vehicle
-        </label>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            Save
-          </Button>
-          <Button variant="outlined" onClick={onClose}>
-            Cancel
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
+    <div className="modal">
+      <div className="modal-content">
+        <h2>Add New User</h2>
+        <label>First Name: <input type="text" name="firstName" value={newUser.firstName} onChange={handleChange} /></label>
+        <label>Last Name: <input type="text" name="lastName" value={newUser.lastName} onChange={handleChange} /></label>
+        <label>Email: <input type="email" name="email" value={newUser.email} onChange={handleChange} /></label>
+        <label>Has Handicap Placard: <input type="checkbox" name="hasHandicapPlacard" checked={newUser.hasHandicapPlacard} onChange={handleChange} /></label>
+        <label>Has EV: <input type="checkbox" name="hasEv" checked={newUser.hasEv} onChange={handleChange} /></label>
+        <button onClick={handleSave}>Add User</button>
+        <button onClick={onClose}>Cancel</button>
+      </div>
+    </div>
   );
 };
 

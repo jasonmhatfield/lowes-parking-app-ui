@@ -1,156 +1,169 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import AddUserModal from '../modals/AddUserModal';
+import { useNavigate } from 'react-router-dom';
 import EditUserModal from '../modals/EditUserModal';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import { Button, IconButton, Tooltip } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon, LockOpen as LockOpenIcon, Lock as LockIcon } from '@mui/icons-material';
-import { useAlert } from '../context/AlertContext';
+import AddUserModal from '../modals/AddUserModal';
+import DeleteUserModal from '../modals/DeleteUserModal';
 
-const AdminDashboard = ({ currentUser, onLogout }) => {
+const AdminDashboard = () => {
   const [gates, setGates] = useState([]);
   const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
-  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
-  const [editUserModalOpen, setEditUserModalOpen] = useState(false);
-  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
-  const [userToEdit, setUserToEdit] = useState(null);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const { showAlert } = useAlert();
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchGates = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/gates');
-        setGates(response.data);
+        const [gatesResponse, usersResponse] = await Promise.all([
+          fetch('http://localhost:8080/api/gates'),
+          fetch('http://localhost:8080/api/users')
+        ]);
+
+        const gatesData = await gatesResponse.json();
+        const usersData = await usersResponse.json();
+
+        setGates(gatesData);
+        setUsers(usersData.filter(user => user.role !== 'admin'));
       } catch (error) {
-        console.error('Error fetching gates:', error);
-        setError('Error fetching gates.');
+        console.error('Error fetching data:', error);
       }
     };
 
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/api/users');
-        setUsers(response.data.filter(user => user.role !== 'admin'));
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setError('Error fetching users.');
-      }
-    };
-
-    fetchGates();
-    fetchUsers();
+    fetchData();
   }, []);
 
-  const toggleGateStatus = async (gateId, currentStatus) => {
+  const handleLogout = () => navigate('/');
+
+  const handleGateToggle = async (id, currentStatus) => {
     try {
-      const response = await axios.patch(`http://localhost:8080/api/gates/${gateId}`, null, {
-        params: { isOperational: !currentStatus },
+      const response = await fetch(`http://localhost:8080/api/gates/${id}?isOperational=${!currentStatus}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
       });
-      const updatedGate = response.data;
-      setGates(prevGates => prevGates.map(gate => gate.id === gateId ? updatedGate : gate));
-      if (!updatedGate.isOperational) {
-        showAlert(`Gate ${updatedGate.gateName} is now closed.`);
+
+      if (response.ok) {
+        setGates(gates.map(gate => gate.id === id ? { ...gate, operational: !currentStatus } : gate));
+      } else {
+        console.error('Error updating gate status');
       }
     } catch (error) {
-      console.error('Failed to update gate status:', error);
-      setError('Failed to update gate status.');
+      console.error('Error updating gate status:', error);
     }
   };
 
-  const handleAddUser = async (user) => {
+  const handleEditUser = (user) => {
+    setCurrentUser(user);
+    setShowEditModal(true);
+  };
+
+  const handleAddUser = () => setShowAddModal(true);
+
+  const handleDeleteUser = (user) => {
+    setCurrentUser(user);
+    setShowDeleteModal(true);
+  };
+
+  const saveEditedUser = async (editedUser) => {
     try {
-      const response = await axios.post('http://localhost:8080/api/users', user);
-      setUsers([...users, response.data]);
+      const response = await fetch(`http://localhost:8080/api/users/${editedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editedUser),
+      });
+
+      if (response.ok) {
+        setUsers(users.map(user => user.id === editedUser.id ? editedUser : user));
+      } else {
+        console.error('Error saving user');
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+    }
+  };
+
+  const addNewUser = async (newUser) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser),
+      });
+
+      if (response.ok) {
+        const savedUser = await response.json();
+        setUsers([...users, savedUser]);
+      } else {
+        console.error('Error adding user');
+      }
     } catch (error) {
       console.error('Error adding user:', error);
-      setError('Error adding user.');
     }
   };
 
-  const handleEditUser = async (updatedUser) => {
+  const deleteUser = async (userId) => {
     try {
-      const response = await axios.put(`http://localhost:8080/api/users/${updatedUser.id}`, updatedUser);
-      setUsers(users.map(user => user.id === updatedUser.id ? response.data : user));
-    } catch (error) {
-      console.error('Error updating user:', error);
-      setError('Error updating user.');
-    }
-  };
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+        method: 'DELETE',
+      });
 
-  const handleDeleteUser = async (userId) => {
-    try {
-      await axios.delete(`http://localhost:8080/api/users/${userId}`);
-      setUsers(users.filter(user => user.id !== userId));
+      if (response.ok) {
+        setUsers(users.filter(user => user.id !== userId));
+      } else {
+        console.error('Error deleting user');
+      }
     } catch (error) {
       console.error('Error deleting user:', error);
-      setError('Error deleting user.');
-    }
-  };
-
-  const confirmDeleteUser = (user) => {
-    setUserToDelete(user);
-    setConfirmationModalOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (userToDelete) {
-      handleDeleteUser(userToDelete.id);
-      setUserToDelete(null);
-      setConfirmationModalOpen(false);
     }
   };
 
   return (
-    <div>
-      <h2>Admin Dashboard</h2>
-      <p>Welcome, {currentUser.firstName} {currentUser.lastName}</p>
-      <button onClick={onLogout}>Logout</button>
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <h1>Admin Dashboard</h1>
+      <button onClick={handleLogout}>Logout</button>
 
-      <h3>Manage Parking Gates</h3>
-      {error && <p>{error}</p>}
+      <h2>Gates</h2>
       {gates.map(gate => (
-        <div key={gate.id}>
-          <Tooltip title={gate.isOperational ? 'Close Gate' : 'Open Gate'}>
-            <span>
-              <Button
-                onClick={() => toggleGateStatus(gate.id, gate.isOperational)}
-                variant="contained"
-                color={gate.isOperational ? "secondary" : "primary"}
-              >
-                {gate.isOperational ? <LockOpenIcon /> : <LockIcon />}
-              </Button>
-            </span>
-          </Tooltip>
-          <p>{gate.gateName}: {gate.isOperational ? 'Open' : 'Closed'}</p>
+        <div key={gate.id} style={{ margin: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ marginRight: '10px' }}>Gate: {gate.gateName}</span>
+          <span style={{ marginRight: '10px' }}>Status: {gate.operational ? 'Open' : 'Closed'}</span>
+          <button onClick={() => handleGateToggle(gate.id, gate.operational)}>
+            {gate.operational ? 'Close' : 'Open'}
+          </button>
         </div>
       ))}
 
-      <h3>Manage Users</h3>
-      <Button variant="contained" color="primary" onClick={() => setAddUserModalOpen(true)}>Add User</Button>
+      <h2>Users</h2>
       {users.map(user => (
-        <div key={user.id}>
-          <p>{user.firstName} {user.lastName}</p>
-          <IconButton onClick={() => { setUserToEdit(user); setEditUserModalOpen(true); }}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => confirmDeleteUser(user)}>
-            <DeleteIcon />
-          </IconButton>
+        <div key={user.id} style={{ margin: '10px' }}>
+          <span>{user.firstName} {user.lastName}</span>
+          <button onClick={() => handleEditUser(user)}>Edit</button>
+          <button onClick={() => handleDeleteUser(user)}>Delete</button>
         </div>
       ))}
+      <button onClick={handleAddUser}>Add New User</button>
 
-      <AddUserModal open={addUserModalOpen} onClose={() => setAddUserModalOpen(false)} onSave={handleAddUser} />
-      {userToEdit && (
-        <EditUserModal open={editUserModalOpen} onClose={() => setEditUserModalOpen(false)} onSave={handleEditUser} userToEdit={userToEdit} />
+      {showEditModal && (
+        <EditUserModal
+          user={currentUser}
+          onClose={() => setShowEditModal(false)}
+          onSave={saveEditedUser}
+        />
       )}
-      <ConfirmationModal
-        open={confirmationModalOpen}
-        onClose={() => setConfirmationModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-        message={`Are you sure you want to delete ${userToDelete?.firstName} ${userToDelete?.lastName}?`}
-      />
+      {showAddModal && (
+        <AddUserModal
+          onClose={() => setShowAddModal(false)}
+          onSave={addNewUser}
+        />
+      )}
+      {showDeleteModal && (
+        <DeleteUserModal
+          user={currentUser}
+          onClose={() => setShowDeleteModal(false)}
+          onDelete={deleteUser}
+        />
+      )}
     </div>
   );
 };

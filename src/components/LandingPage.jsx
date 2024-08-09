@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const LandingPage = ({ onSelectUser }) => {
+const LandingPage = () => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/users');
-        setUsers(response.data);
+        const response = await fetch('http://localhost:8080/api/users');
+        const data = await response.json();
+        setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -19,19 +19,27 @@ const LandingPage = ({ onSelectUser }) => {
     fetchUsers();
   }, []);
 
-  const handleUserSelect = (user) => {
-    onSelectUser(user);
-    navigate(user.role === 'admin' ? '/admin' : '/user');
+  const handleLogin = (user) => {
+    localStorage.setItem('loggedInUser', JSON.stringify(user));
+    navigate(user.role === 'admin' ? '/admin-dashboard' : '/employee-dashboard');
   };
 
   return (
-    <div>
-      <h2>Select User to Log In</h2>
-      {users.map(user => (
-        <button key={user.id} onClick={() => handleUserSelect(user)}>
-          {user.firstName} {user.lastName} - {user.role}
-        </button>
-      ))}
+    <div style={{ textAlign: 'center', marginTop: '20%' }}>
+      <h1>Select a User to Login</h1>
+      {users.length > 0 ? (
+        users.map(user => (
+          <button
+            key={user.id}
+            onClick={() => handleLogin(user)}
+            style={{ display: 'block', margin: '10px auto' }}
+          >
+            {user.firstName} {user.lastName} ({user.role})
+          </button>
+        ))
+      ) : (
+        <p>Loading users...</p>
+      )}
     </div>
   );
 };
