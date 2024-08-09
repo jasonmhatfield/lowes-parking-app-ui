@@ -1,0 +1,133 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1c1c2e;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2 {
+    color: #e0e0eb;
+}
+
+button {
+    background-color: #4b4b7c;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #6b6b9e;
+}
+
+button:disabled {
+    background-color: #33334d;
+    cursor: not-allowed;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #29293d;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.modal-content h2 {
+    color: #d1d1e0;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="checkbox"] {
+    padding: 8px;
+    margin-right: 10px;
+    margin-bottom: 20px;
+    background-color: #4b4b7c;
+    border: none;
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+.modal-content button {
+    margin: 5px;
+}
+
+/* Centered Container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Gate and Parking Spot Display */
+.display-item {
+    background-color: #33334d;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.display-item span {
+    font-size: 16px;
+    color: #e0e0eb;
+}
+
+/* Logout Button */
+.logout-button {
+    background-color: #4b4b7c;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    float: right;
+    margin-top: -50px;
+}
+
+.logout-button:hover {
+    background-color: #6b6b9e;
+}
+
+/* Specific Styles for Titles */
+.title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2em;
+}
+
+.subtitle {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+/* For Mobile Responsiveness */
+@media (max-width: 600px) {
+    .display-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}

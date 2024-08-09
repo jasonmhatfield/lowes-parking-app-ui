@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
-import AdminDashboard from '../components/AdminDashboard';
+import AdminDashboard from '../../../../../../AppData/Roaming/JetBrains/IntelliJIdea2024.1/scratches/AdminDashboard';
 import { AlertProvider } from '../context/AlertContext';
 
 jest.mock('axios');

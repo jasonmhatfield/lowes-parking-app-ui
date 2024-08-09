@@ -1,59 +1,19 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
-import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
-import { AlertProvider } from './context/AlertContext';
+import EmployeeDashboard from './components/EmployeeDashboard';
 
-function App() {
-  const [selectedUser, setSelectedUser] = useState(null);
-
-  const handleUserSelect = (user) => {
-    setSelectedUser(user);
-  };
-
-  const handleLogout = () => {
-    setSelectedUser(null);
-  };
-
+const App = () => {
   return (
-    <AlertProvider>
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              selectedUser ? (
-                <Navigate to={selectedUser.role === 'admin' ? '/admin' : '/user'} />
-              ) : (
-                <LandingPage onSelectUser={handleUserSelect} />
-              )
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              selectedUser && selectedUser.role === 'admin' ? (
-                <AdminDashboard currentUser={selectedUser} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-          <Route
-            path="/user"
-            element={
-              selectedUser && selectedUser.role !== 'admin' ? (
-                <UserDashboard currentUser={selectedUser} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-        </Routes>
-      </Router>
-    </AlertProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
