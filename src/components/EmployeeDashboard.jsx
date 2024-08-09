@@ -5,6 +5,7 @@ import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import { Button } from '@mui/material';
+import '../styles/EmployeeDashboard.css';
 
 const EmployeeDashboard = () => {
   const [parkingSpots, setParkingSpots] = useState([]);
@@ -80,7 +81,6 @@ const EmployeeDashboard = () => {
     if (spot.type === 'regular') return true;
     if (spot.type === 'handicap' && user?.hasHandicapPlacard) return true;
     return spot.type === 'ev' && user?.hasEv;
-
   };
 
   const getIconForSpot = (spot) => {
@@ -95,66 +95,38 @@ const EmployeeDashboard = () => {
     }
   };
 
-  const getButtonStyle = (spot) => {
-    const greyColor = '#616161';  // Unified grey color for occupied and unavailable spots
-    const greyBorder = '#424242';
-
-    if (spot.id === userParkingSpotId) {
-      return {
-        backgroundColor: '#4CAF50', // Green for user's parked spot
-        border: '2px solid #388E3C',
-      };
-    }
-
-    if (spot.occupied || userParkingSpotId !== null || !canParkInSpot(spot)) {
-      return {
-        backgroundColor: greyColor, // Grey for all occupied or unavailable spots
-        border: `2px solid ${greyBorder}`,
-      };
-    }
-
-    return {
-      backgroundColor: '#1976D2', // Blue for available spots
-      border: '2px solid #0D47A1',
-    };
+  const getButtonClass = (spot) => {
+    if (spot.id === userParkingSpotId) return 'parking-button green';
+    if (spot.occupied || userParkingSpotId !== null || !canParkInSpot(spot)) return 'parking-button grey';
+    return 'parking-button blue';
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      {user && <h1>Welcome, {user.firstName}</h1>}
-      <Button variant="contained" onClick={handleLogout} style={{ marginBottom: '20px' }}>
+    <div className="employee-dashboard">
+      {user && <h1 className="welcome-message">Welcome, {user.firstName}</h1>}
+      <Button variant="contained" onClick={handleLogout} className="logout-button">
         Logout
       </Button>
 
       <h2>Gates</h2>
       {gates.map(gate => (
-        <div key={gate.id} style={{ margin: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ marginRight: '10px' }}>Gate: {gate.gateName}</span>
-          <span style={{ marginRight: '10px' }}>Status: {gate.operational ? 'Open' : 'Closed'}</span>
+        <div key={gate.id} className="gate-status">
+          <span>Gate: {gate.gateName}</span>
+          <span>Status: {gate.operational ? 'Open' : 'Closed'}</span>
         </div>
       ))}
 
       <h2>Parking Spaces</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div className="parking-spaces">
         {parkingSpots.map(spot => (
           <Button
             key={spot.id}
             onClick={() => handleParking(spot)}
-            disabled={spot.id !== userParkingSpotId && (!canParkInSpot(spot) || userParkingSpotId !== null)} // Disable other spots when the user is parked
-            style={{
-              margin: '10px',
-              padding: '20px',
-              borderRadius: '10px',
-              color: '#fff',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...getButtonStyle(spot),
-            }}
+            disabled={spot.id !== userParkingSpotId && (!canParkInSpot(spot) || userParkingSpotId !== null)}
+            className={getButtonClass(spot)}
           >
             {getIconForSpot(spot)}
-            <span style={{ marginTop: '5px' }}>{spot.spotNumber}</span>
+            <span>{spot.spotNumber}</span>
           </Button>
         ))}
       </div>
