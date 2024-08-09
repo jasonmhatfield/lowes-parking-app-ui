@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/LandingPage.css';
+import LowesLogo from '../assets/lowes-logo.png'; // Ensure this path matches where you store the logo
 
 const LandingPage = () => {
   const [users, setUsers] = useState([]);
@@ -21,25 +23,39 @@ const LandingPage = () => {
 
   const handleLogin = (user) => {
     localStorage.setItem('loggedInUser', JSON.stringify(user));
-    navigate(user.role === 'admin' ? '/admin-dashboard' : '/employee-dashboard');
+    if (user.role === 'admin') {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/employee-dashboard');
+    }
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '20%' }}>
-      <h1>Select a User to Login</h1>
-      {users.length > 0 ? (
-        users.map(user => (
-          <button
-            key={user.id}
-            onClick={() => handleLogin(user)}
-            style={{ display: 'block', margin: '10px auto' }}
-          >
-            {user.firstName} {user.lastName} ({user.role})
-          </button>
-        ))
-      ) : (
-        <p>Loading users...</p>
-      )}
+    <div className="landing-page">
+      <header className="header">
+        <img src={LowesLogo} alt="Lowe's Logo" className="logo" />
+        <h1>Welcome to Lowe's Parking Management</h1>
+        <p>Manage your parking efficiently and effortlessly.</p>
+      </header>
+
+      <section className="login-section">
+        <h2>Select a User to Login</h2>
+        <div className="login-buttons">
+          {users && users.length > 0 ? (
+            users.map((user) => (
+              <button
+                key={user.id}
+                onClick={() => handleLogin(user)}
+                className="login-button"
+              >
+                {user.firstName} {user.lastName}
+              </button>
+            ))
+          ) : (
+            <p>Loading users...</p>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
