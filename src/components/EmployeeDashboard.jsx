@@ -76,15 +76,15 @@ const EmployeeDashboard = () => {
   };
 
   const canParkInSpot = (spot) => {
-    if (spot.occupied) return false;
+    if (spot.occupied && spot.id !== userParkingSpotId) return false;
     if (spot.type === 'regular') return true;
     if (spot.type === 'handicap' && user?.hasHandicapPlacard) return true;
-    if (spot.type === 'ev' && user?.hasEv) return true;
-    return false;
+    return spot.type === 'ev' && user?.hasEv;
+
   };
 
   const getIconForSpot = (spot) => {
-    if (spot.occupied) return <DirectionsCarIcon />;
+    if (spot.occupied) return <DirectionsCarIcon />; // Show car icon for all occupied spots, including the user's
     switch (spot.type) {
       case 'ev':
         return <EvStationIcon />;
@@ -140,7 +140,7 @@ const EmployeeDashboard = () => {
           <Button
             key={spot.id}
             onClick={() => handleParking(spot)}
-            disabled={!canParkInSpot(spot) || (userParkingSpotId !== null && spot.id !== userParkingSpotId)} // Disable if user can't park or is already parked
+            disabled={spot.id !== userParkingSpotId && (!canParkInSpot(spot) || userParkingSpotId !== null)} // Disable other spots when the user is parked
             style={{
               margin: '10px',
               padding: '20px',
