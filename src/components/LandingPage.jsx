@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/LandingPage.css';
-import LowesLogo from '../assets/lowes-logo.png'; // Ensure this path matches where you store the logo
+import LowesLogo from '../assets/lowes-logo.png';
 
 const LandingPage = () => {
   const [users, setUsers] = useState([]);
@@ -30,6 +30,11 @@ const LandingPage = () => {
     }
   };
 
+  // Filter users to display only Jason, Michael, and Emily
+  const filteredUsers = users.filter(
+    (user) => ['Jason', 'Michael', 'Emily'].includes(user.firstName)
+  );
+
   return (
     <div className="landing-page">
       <header className="header">
@@ -41,8 +46,8 @@ const LandingPage = () => {
       <section className="login-section">
         <h2>Select a User to Login</h2>
         <div className="login-buttons">
-          {users && users.length > 0 ? (
-            users.map((user) => (
+          {filteredUsers && filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
               <button
                 key={user.id}
                 onClick={() => handleLogin(user)}

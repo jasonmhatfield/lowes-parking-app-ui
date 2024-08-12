@@ -1,16 +1,52 @@
-/* EmployeeDashboard.css */
-
-.parking-spaces {
+.parking-garage {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
+    width: 100%;
+}
+
+.parking-row {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.left-row {
+    flex-direction: row;
+}
+
+.right-row {
+    flex-direction: row;
+}
+
+.parking-road {
+    width: 100%;
+    height: 60px;
+    background-color: #333;
+    margin-bottom: 10px;
+}
+
+.vertical-road {
+    width: 60px;
+    height: 200px;
+    background-color: #333;
+    margin-bottom: 10px;
+}
+
+.horizontal-road {
+    width: 100%;
+    height: 60px;
+    background-color: #333;
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 .parking-button {
     position: relative;
     margin: 10px;
-    padding: 20px;
+    padding: 10px;
     border-radius: 10px;
     color: #fff;
     display: flex;
@@ -18,50 +54,45 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease, transform 0.3s ease;
-    width: 100px;  /* Adjust width */
-    height: 100px; /* Adjust height */
-    font-size: 1.5em; /* Increase font size for icons */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 80px;
+    height: 80px;
+    font-size: 1.5em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     cursor: pointer;
 }
 
 .parking-button.green {
-    background-color: #4CAF50; /* Green for user's parked spot */
+    background-color: #4CAF50;
     border: 2px solid #388E3C;
 }
 
 .parking-button.grey {
-    background-color: #616161; /* Grey for all occupied or unavailable spots */
+    background-color: #616161;
     border: 2px solid #424242;
 }
 
 .parking-button.blue {
-    background-color: #1976D2; /* Blue for available spots */
+    background-color: #1976D2;
     border: 2px solid #0D47A1;
 }
 
 .parking-button span {
     margin-top: 5px;
     font-size: 14px;
-    color: #ffffff; /* Ensuring the text color remains white for visibility */
+    color: #ffffff;
 }
 
 .parking-button .MuiSvgIcon-root {
-    font-size: 3rem; /* Increase icon size */
-    color: #FFFFFF; /* White color for the icons to contrast with the blue background */
+    font-size: 2.5rem;
+    color: #FFFFFF;
 }
 
 .parking-button:hover {
-    transform: translateY(-2px); /* Slight hover effect */
+    transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.background-car-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 6rem; /* Bigger icon for occupied spots */
-    color: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
-    z-index: 1;
+.floor-select {
+    margin-top: 20px;
+    width: 200px;
 }
