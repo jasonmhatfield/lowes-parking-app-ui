@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
-import { Button } from '@mui/material';
+import { Button, Modal } from '@mui/material';
 import '../styles/EmployeeDashboard.css';
 
 const EmployeeDashboard = () => {
@@ -12,35 +15,92 @@ const EmployeeDashboard = () => {
   const [gates, setGates] = useState([]);
   const [user, setUser] = useState(null);
   const [userParkingSpotId, setUserParkingSpotId] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [parkingModalOpen, setParkingModalOpen] = useState(false);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     setUser(loggedInUser);
 
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
         const [parkingSpotsResponse, gatesResponse] = await Promise.all([
-          fetch('http://localhost:8080/api/parkingSpots'),
-          fetch('http://localhost:8080/api/gates')
+          axios.get('http://localhost:8080/api/parkingSpots'),
+          axios.get('http://localhost:8080/api/gates')
         ]);
 
-        const parkingSpotsData = await parkingSpotsResponse.json();
-        const gatesData = await gatesResponse.json();
-
-        setParkingSpots(parkingSpotsData);
-        setGates(gatesData);
+        setParkingSpots(parkingSpotsResponse.data);
+        setGates(gatesResponse.data);
 
         if (loggedInUser) {
-          const userSpot = parkingSpotsData.find(spot => spot.userId === loggedInUser.id);
-          if (userSpot) setUserParkingSpotId(userSpot.id);
+          const userSpot = parkingSpotsResponse.data.find(spot => spot.userId === loggedInUser.id);
+          if (userSpot) {
+            setUserParkingSpotId(userSpot.id);
+            setParkingModalOpen(true); // Open modal if user is parked
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    fetchData();
+    fetchInitialData();
+
+    // Initialize WebSocket connection
+    const socket = new SockJS('http://localhost:8080/ws');
+    const stompClient = Stomp.over(socket);
+
+    const connectWebSocket = () => {
+      stompClient.connect({}, (frame) => {
+        console.log('Connected: ' + frame);
+
+        // Subscribe to gate updates
+        stompClient.subscribe('/topic/gates', (message) => {
+          const updatedGate = JSON.parse(message.body);
+          console.log("Received gate update:", updatedGate);
+          setGates((prevGates) =>
+            prevGates.map((gate) =>
+              gate.id === updatedGate.id ? updatedGate : gate
+            )
+          );
+        });
+
+        // Subscribe to parking spot updates
+        stompClient.subscribe('/topic/parkingSpots', (message) => {
+          const updatedSpot = JSON.parse(message.body);
+          console.log("Received parking spot update:", updatedSpot);
+          setParkingSpots((prevSpots) =>
+            prevSpots.map((spot) =>
+              spot.id === updatedSpot.id ? updatedSpot : spot
+            )
+          );
+        });
+
+        // Subscribe to notifications
+        stompClient.subscribe('/topic/notifications', (message) => {
+          console.log("Received notification:", message.body);
+          setNotifications((prev) => [...prev, message.body]);
+          setNotificationModalOpen(true); // Show notification modal
+        });
+      });
+
+      stompClient.debug = () => {}; // Disable STOMP debugging in production
+    };
+
+    connectWebSocket();
+
+    socket.onclose = () => {
+      console.log('WebSocket disconnected. Attempting to reconnect...');
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    return () => {
+      stompClient.disconnect(() => {
+        console.log('WebSocket disconnected cleanly.');
+      });
+    };
   }, []);
 
   const handleLogout = () => {
@@ -58,16 +118,15 @@ const EmployeeDashboard = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/api/parkingSpots/${spot.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
+      const response = await axios.patch(`http://localhost:8080/api/parkingSpots/${spot.id}`, updates);
 
-      if (response.ok) {
-        const updatedSpot = await response.json();
-        setParkingSpots(parkingSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
+      if (response.status === 200) {
+        const updatedSpot = response.data;
+        setParkingSpots((prevSpots) =>
+          prevSpots.map((s) => (s.id === updatedSpot.id ? updatedSpot : s))
+        );
         setUserParkingSpotId(isLeaving ? null : spot.id);
+        setParkingModalOpen(!isLeaving);
       } else {
         console.error('Failed to update parking spot.');
       }
@@ -84,7 +143,7 @@ const EmployeeDashboard = () => {
   };
 
   const getIconForSpot = (spot) => {
-    if (spot.occupied) return <DirectionsCarIcon />; // Show car icon for all occupied spots, including the user's
+    if (spot.occupied) return <DirectionsCarIcon />;
     switch (spot.type) {
       case 'ev':
         return <EvStationIcon />;
@@ -97,12 +156,13 @@ const EmployeeDashboard = () => {
 
   const getButtonClass = (spot) => {
     if (spot.id === userParkingSpotId) return 'parking-button green';
-    if (spot.occupied || userParkingSpotId !== null || !canParkInSpot(spot)) return 'parking-button grey';
+    if (spot.occupied || userParkingSpotId !== null || !canParkInSpot(spot))
+      return 'parking-button grey';
     return 'parking-button blue';
   };
 
   return (
-    <div className="employee-dashboard">
+    <div className="container">
       {user && <h1 className="welcome-message">Welcome, {user.firstName}</h1>}
       <Button variant="contained" onClick={handleLogout} className="logout-button">
         Logout
@@ -111,8 +171,10 @@ const EmployeeDashboard = () => {
       <h2>Gates</h2>
       {gates.map(gate => (
         <div key={gate.id} className="gate-status">
-          <span>Gate: {gate.gateName}</span>
-          <span>Status: {gate.operational ? 'Open' : 'Closed'}</span>
+          <div className={`gate-icon ${gate.operational ? 'gate-open' : 'gate-closed'}`}>
+            {gate.operational ? 'Open' : 'Closed'}
+          </div>
+          <span>{gate.gateName}</span>
         </div>
       ))}
 
@@ -130,6 +192,36 @@ const EmployeeDashboard = () => {
           </Button>
         ))}
       </div>
+
+      <Modal
+        open={parkingModalOpen}
+        onClose={() => setParkingModalOpen(false)}
+        aria-labelledby="parked-modal-title"
+        aria-describedby="parked-modal-description"
+      >
+        <div className="parking-modal-content">
+          <h2>You are parked at spot {userParkingSpotId}</h2>
+          <Button variant="contained" onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}>
+            Leave Spot
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={notificationModalOpen}
+        onClose={() => setNotificationModalOpen(false)}
+        aria-labelledby="notification-modal-title"
+        aria-describedby="notification-modal-description"
+      >
+        <div className="notification-modal-content">
+          <h2>New Notifications</h2>
+          {notifications.map((note, index) => (
+            <div key={index} className="notification">
+              {note}
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 };

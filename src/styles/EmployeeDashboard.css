@@ -1,40 +1,14 @@
-.employee-dashboard {
-    text-align: center;
-    margin-top: 20px;
-}
+/* EmployeeDashboard.css */
 
-.welcome-message {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #f5deb3; /* Updated color to match the theme */
-}
-
-.logout-button {
-    margin-bottom: 20px;
-}
-
-.gate-status {
-    margin: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.gate-status span {
-    margin-right: 10px;
-    font-size: 16px;
-    color: #e0e0eb;
-}
-
-/* Parking Spaces Layout */
 .parking-spaces {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 20px;
 }
 
-/* Button styles */
 .parking-button {
+    position: relative;
     margin: 10px;
     padding: 20px;
     border-radius: 10px;
@@ -44,6 +18,11 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100px;  /* Adjust width */
+    height: 100px; /* Adjust height */
+    font-size: 1.5em; /* Increase font size for icons */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
 
 .parking-button.green {
@@ -65,4 +44,24 @@
     margin-top: 5px;
     font-size: 14px;
     color: #ffffff; /* Ensuring the text color remains white for visibility */
+}
+
+.parking-button .MuiSvgIcon-root {
+    font-size: 3rem; /* Increase icon size */
+    color: #FFFFFF; /* White color for the icons to contrast with the blue background */
+}
+
+.parking-button:hover {
+    transform: translateY(-2px); /* Slight hover effect */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.background-car-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6rem; /* Bigger icon for occupied spots */
+    color: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    z-index: 1;
 }
