@@ -30,7 +30,6 @@ const LandingPage = () => {
     }
   };
 
-  // Filter users to display only Jason, Michael, and Emily
   const filteredUsers = users.filter(
     (user) => ['Jason', 'Michael', 'Emily'].includes(user.firstName)
   );

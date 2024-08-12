@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import EvStationIcon from '@mui/icons-material/EvStation';
-import '../styles/Modal.css';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
 
 const AddUserModal = ({ onClose, onSave }) => {
   const [newUser, setNewUser] = useState({
@@ -23,53 +24,49 @@ const AddUserModal = ({ onClose, onSave }) => {
   };
 
   const handleSave = async () => {
-    await onSave(newUser); // Calling the onSave function passed as a prop
+    await onSave(newUser);
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">Add New User</div>
-        <div className="modal-body">
-          <div className="form-group">
-            <label>First Name</label>
-            <input type="text" name="firstName" value={newUser.firstName} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>Last Name</label>
-            <input type="text" name="lastName" value={newUser.lastName} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input type="email" name="email" value={newUser.email} onChange={handleChange} />
-          </div>
-          <div className="toggle-button-group">
-            <button
-              className={`toggle-button ${newUser.hasHandicapPlacard ? 'active' : ''}`}
-              onClick={() => handleToggle('hasHandicapPlacard')}
-              style={{ backgroundColor: newUser.hasHandicapPlacard ? '#4CAF50' : '#616161' }}
-            >
-              <AccessibleIcon />
-            </button>
-            <button
-              className={`toggle-button ${newUser.hasEv ? 'active' : ''}`}
-              onClick={() => handleToggle('hasEv')}
-              style={{ backgroundColor: newUser.hasEv ? '#4CAF50' : '#616161' }}
-            >
-              <EvStationIcon />
-            </button>
-          </div>
+    <Modal open={true} onClose={onClose}>
+      <div className="modal-header">Add New User</div>
+      <div className="modal-body">
+        <div className="form-group">
+          <label>First Name</label>
+          <input type="text" name="firstName" value={newUser.firstName} onChange={handleChange} />
         </div>
-        <div className="modal-footer">
-          <button className="close-button" onClick={onClose}>
-            Cancel
+        <div className="form-group">
+          <label>Last Name</label>
+          <input type="text" name="lastName" value={newUser.lastName} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value={newUser.email} onChange={handleChange} />
+        </div>
+        <div className="toggle-button-group">
+          <button
+            className={`toggle-button ${newUser.hasHandicapPlacard ? 'active' : ''}`}
+            onClick={() => handleToggle('hasHandicapPlacard')}
+          >
+            <AccessibleIcon />
           </button>
-          <button className="submit-button" onClick={handleSave}>
-            Save
+          <button
+            className={`toggle-button ${newUser.hasEv ? 'active' : ''}`}
+            onClick={() => handleToggle('hasEv')}
+          >
+            <EvStationIcon />
           </button>
         </div>
       </div>
-    </div>
+      <div className="modal-footer">
+        <Button className="close-button" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button className="submit-button" onClick={handleSave}>
+          Save
+        </Button>
+      </div>
+    </Modal>
   );
 };
 

@@ -14,10 +14,11 @@ body {
     background-color: #004792; /* Lowe's blue */
     color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
 }
 
 .header .logo {
-    max-width: 150px; /* Adjust size as necessary */
+    max-width: 200px; /* Adjust size as necessary */
     margin-bottom: 20px;
 }
 

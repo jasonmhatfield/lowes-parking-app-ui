@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/Modal.css';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
 
 const ManageGatesModal = ({ onClose }) => {
   const [gates, setGates] = useState([]);
@@ -40,25 +41,23 @@ const ManageGatesModal = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">Manage Gates</div>
-        <div className="modal-body">
-          {gates.map(gate => (
-            <div key={gate.id} className="display-item">
-              <span>Gate: {gate.gateName}</span>
-              <span>Status: {gate.operational ? 'Open' : 'Closed'}</span>
-              <button onClick={() => handleGateToggle(gate.id, gate.operational)} disabled={updating}>
-                {gate.operational ? 'Close' : 'Open'}
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="modal-footer">
-          <button className="close-button" onClick={onClose}>Close</button>
-        </div>
+    <Modal open={true} onClose={onClose}>
+      <div className="modal-header">Manage Gates</div>
+      <div className="modal-body">
+        {gates.map(gate => (
+          <div key={gate.id} className="display-item">
+            <span>Gate: {gate.gateName}</span>
+            <span>Status: {gate.operational ? 'Open' : 'Closed'}</span>
+            <Button onClick={() => handleGateToggle(gate.id, gate.operational)} disabled={updating}>
+              {gate.operational ? 'Close' : 'Open'}
+            </Button>
+          </div>
+        ))}
       </div>
-    </div>
+      <div className="modal-footer">
+        <Button className="close-button" onClick={onClose}>Close</Button>
+      </div>
+    </Modal>
   );
 };
 

@@ -3,7 +3,7 @@ import ManageGatesModal from '../modals/ManageGatesModal';
 import ManageParkingSpacesModal from '../modals/ManageParkingSpacesModal';
 import ManageUsersModal from '../modals/ManageUsersModal';
 import AddUserModal from '../modals/AddUserModal';
-import Button from '../components/Button';
+import Button from './Button';
 import '../styles/AdminDashboard.css';
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +16,6 @@ const AdminDashboard = () => {
 
   const handleLogout = () => navigate('/');
 
-  // Define the handleAddUser function
   const handleAddUser = async (newUser) => {
     try {
       const response = await fetch('http://localhost:8080/api/users', {
@@ -26,8 +25,6 @@ const AdminDashboard = () => {
       });
 
       if (response.ok) {
-        console.log('User added successfully');
-        // Optionally, you can close the modal after saving
         setShowAddUserModal(false);
       } else {
         console.error('Error adding user');
@@ -49,18 +46,10 @@ const AdminDashboard = () => {
         <Button onClick={() => setShowAddUserModal(true)} className="action-button">Add User</Button>
       </div>
 
-      {showGatesModal && (
-        <ManageGatesModal onClose={() => setShowGatesModal(false)} />
-      )}
-      {showParkingSpacesModal && (
-        <ManageParkingSpacesModal onClose={() => setShowParkingSpacesModal(false)} />
-      )}
-      {showUsersModal && (
-        <ManageUsersModal onClose={() => setShowUsersModal(false)} />
-      )}
-      {showAddUserModal && (
-        <AddUserModal onClose={() => setShowAddUserModal(false)} onSave={handleAddUser} />
-      )}
+      {showGatesModal && <ManageGatesModal onClose={() => setShowGatesModal(false)} />}
+      {showParkingSpacesModal && <ManageParkingSpacesModal onClose={() => setShowParkingSpacesModal(false)} />}
+      {showUsersModal && <ManageUsersModal onClose={() => setShowUsersModal(false)} />}
+      {showAddUserModal && <AddUserModal onClose={() => setShowAddUserModal(false)} onSave={handleAddUser} />}
     </div>
   );
 };

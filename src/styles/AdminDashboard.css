@@ -1,13 +1,13 @@
 /* AdminDashboard.css */
 
-.container {
-    max-width: 900px;
-    padding: 20px;
-    background-color: #1a1a2e;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    margin: 40px auto 0;
-}
+/*.container {*/
+/*    max-width: 900px;*/
+/*    padding: 20px;*/
+/*    background-color: #1a1a2e;*/
+/*    border-radius: 12px;*/
+/*    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);*/
+/*    margin: 40px auto 0;*/
+/*}*/
 
 .display-item {
     background-color: #33334d;
@@ -95,7 +95,7 @@
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     color: #ffffff;
-    width: 350px;
+    width: 600px;
     max-width: 90%;
     text-align: center;
     z-index: 1100; /* Ensure it appears above the overlay */

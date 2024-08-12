@@ -12,8 +12,8 @@ describe('UserDashboard', () => {
   ];
 
   const mockParkingSpots = [
-    { id: 1, spotNumber: 'A1', isOccupied: false, type: 'regular' },
-    { id: 2, spotNumber: 'A2', isOccupied: true, type: 'regular', userId: 2 },
+    { id: 1, spotNumber: 'A1', occupied: false, type: 'regular' },
+    { id: 2, spotNumber: 'A2', occupied: true, type: 'regular', userId: 2 },
   ];
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('UserDashboard', () => {
     fireEvent.click(parkButton);
 
     axios.patch.mockResolvedValueOnce({
-      data: { id: 1, spotNumber: 'A1', isOccupied: true, userId: 1 },
+      data: { id: 1, spotNumber: 'A1', occupied: true, userId: 1 },
     });
 
     await waitFor(() => {

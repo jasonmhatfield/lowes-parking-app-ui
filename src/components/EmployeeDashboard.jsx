@@ -4,6 +4,8 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import LockIcon from '@mui/icons-material/Lock';
 import { Button, Modal, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import '../styles/EmployeeDashboard.css';
 import SockJS from 'sockjs-client';
@@ -19,6 +21,7 @@ const EmployeeDashboard = () => {
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState('1');
   const [availableSpotsCount, setAvailableSpotsCount] = useState(0);
+  const [backgroundDimmed, setBackgroundDimmed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,6 +46,7 @@ const EmployeeDashboard = () => {
           if (userSpot) {
             setUserParkingSpotId(userSpot.id);
             setParkingModalOpen(true); // Open modal if user is parked
+            setBackgroundDimmed(true); // Dim the background when the modal is open
           }
         }
       } catch (error) {
@@ -98,7 +102,7 @@ const EmployeeDashboard = () => {
 
     const isLeaving = spot.id === userParkingSpotId;
     const updates = {
-      isOccupied: !isLeaving,
+      occupied: !isLeaving,
       userId: isLeaving ? null : user.id
     };
 
@@ -114,6 +118,7 @@ const EmployeeDashboard = () => {
         setParkingSpots(parkingSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
         setUserParkingSpotId(isLeaving ? null : spot.id);
         setParkingModalOpen(!isLeaving);
+        setBackgroundDimmed(!isLeaving); // Toggle background dim when modal state changes
       } else {
         console.error('Failed to update parking spot.');
       }
@@ -151,6 +156,15 @@ const EmployeeDashboard = () => {
     setSelectedFloor(event.target.value);
   };
 
+  const getFloorAndSpot = (spotId) => {
+    const floor = Math.floor(spotId / 100);
+    const spotNumber = spotId % 100;
+    return {
+      floor,
+      spotNumber: spotNumber < 10 ? spotNumber : spotNumber,
+    };
+  };
+
   return (
     <div className="container">
       {user && <h1 className="welcome-message">Welcome, {user.firstName}</h1>}
@@ -162,7 +176,7 @@ const EmployeeDashboard = () => {
         {gates.map(gate => (
           <div key={gate.id} className="gate-status">
             <div className={`gate-icon ${gate.operational ? 'gate-open' : 'gate-closed'}`}>
-              {gate.operational ? 'Open' : 'Closed'}
+              {gate.operational ? <LockOpenIcon /> : <LockIcon />}
             </div>
             <span>{gate.gateName}</span>
           </div>
@@ -217,17 +231,35 @@ const EmployeeDashboard = () => {
         </div>
       </div>
 
+      {backgroundDimmed && <div className="background-dim"></div>}
+
       <Modal
         open={parkingModalOpen}
-        onClose={() => setParkingModalOpen(false)}
+        onClose={() => {
+          setParkingModalOpen(false);
+          setBackgroundDimmed(false);
+        }}
         aria-labelledby="parked-modal-title"
         aria-describedby="parked-modal-description"
       >
         <div className="parking-modal-content">
-          <h2>You are parked at spot {userParkingSpotId}</h2>
-          <Button variant="contained" onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}>
-            Leave Spot
-          </Button>
+          {userParkingSpotId && (
+            <>
+              <div className="floor-display">
+                Floor {getFloorAndSpot(userParkingSpotId).floor}
+              </div>
+              <div className="spot-display">
+                Spot {getFloorAndSpot(userParkingSpotId).spotNumber}
+              </div>
+              <Button
+                variant="contained"
+                className="parking-button green"
+                onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}
+              >
+                Leave Spot
+              </Button>
+            </>
+          )}
         </div>
       </Modal>
 

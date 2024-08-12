@@ -1,9 +1,9 @@
 import React from 'react';
 import '../styles/Tooltip.css';
 
-const Tooltip = ({ children, style }) => {
+const Tooltip = ({ children }) => {
   return (
-    <div className="tooltip" style={style}>
+    <div className="tooltip">
       {children}
     </div>
   );

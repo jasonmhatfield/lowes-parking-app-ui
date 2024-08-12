@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import '../styles/Modal.css';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
 
 const DeleteUserModal = ({ user, onClose, refreshUsers }) => {
   const [deleting, setDeleting] = useState(false);
@@ -12,7 +13,7 @@ const DeleteUserModal = ({ user, onClose, refreshUsers }) => {
       });
 
       if (response.ok) {
-        await refreshUsers(); // Refresh users after delete
+        await refreshUsers();
         onClose();
       } else {
         console.error('Failed to delete user.');
@@ -25,22 +26,20 @@ const DeleteUserModal = ({ user, onClose, refreshUsers }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">Confirm Deletion</div>
-        <div className="modal-body">
-          <p>Are you sure you want to delete {user.firstName} {user.lastName}?</p>
-        </div>
-        <div className="modal-footer">
-          <button className="close-button" onClick={onClose} disabled={deleting}>
-            Cancel
-          </button>
-          <button className="submit-button" onClick={handleDelete} disabled={deleting}>
-            {deleting ? 'Deleting...' : 'Delete'}
-          </button>
-        </div>
+    <Modal open={true} onClose={onClose}>
+      <div className="modal-header">Confirm Deletion</div>
+      <div className="modal-body">
+        <p>Are you sure you want to delete {user.firstName} {user.lastName}?</p>
       </div>
-    </div>
+      <div className="modal-footer">
+        <Button className="close-button" onClick={onClose} disabled={deleting}>
+          Cancel
+        </Button>
+        <Button className="submit-button" onClick={handleDelete} disabled={deleting}>
+          {deleting ? 'Deleting...' : 'Delete'}
+        </Button>
+      </div>
+    </Modal>
   );
 };
 

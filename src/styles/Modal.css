@@ -5,24 +5,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-}
-
-/* Modal Content */
-.modal-content {
-    background: #1a1a2e;
-    padding: 20px 30px;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    color: #ffffff;
-    width: 400px;
-    max-width: 90%;
-    text-align: center;
-    z-index: 1100;
 }
 
 /* Modal Header */
@@ -42,7 +29,7 @@
 
 /* Scrollable List */
 .scrollable-list {
-    max-height: 200px; /* Height of the scrollable area */
+    max-height: 200px;
     overflow-y: auto;
     margin-bottom: 10px;
     width: 100%;
@@ -52,16 +39,16 @@
 }
 
 .scrollable-list::-webkit-scrollbar {
-    width: 4px; /* Width of the scrollbar */
+    width: 4px;
 }
 
 .scrollable-list::-webkit-scrollbar-thumb {
-    background-color: #555573; /* Color of the scrollbar */
+    background-color: #555573;
     border-radius: 10px;
 }
 
 .scrollable-list::-webkit-scrollbar-track {
-    background: transparent; /* Transparent background */
+    background: transparent;
 }
 
 /* Input Fields */
@@ -99,14 +86,14 @@
 /* Cancel and Confirm Buttons */
 .modal-footer .close-button,
 .modal-footer .submit-button {
-    width: 80%; /* Adjust width to be more substantial */
-    padding: 12px;  /* Adjusted padding for better appearance */
+    width: 80%;
+    padding: 12px;
     border-radius: 8px;
     border: none;
-    font-size: 16px;  /* Increased font size */
+    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
-    margin: 0 auto; /* Center align the button */
+    margin: 0 auto;
 }
 
 .modal-footer .close-button {
