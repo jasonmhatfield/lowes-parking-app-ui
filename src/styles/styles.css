@@ -1,0 +1,201 @@
+/* Global Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1c1c2e;
+    color: #e0e0eb;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Containers */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #2a2a3e;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    margin-top: 40px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #004792;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+}
+
+.header-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.logout-button {
+    background-color: #005eb8;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #003f7d;
+}
+
+/* Buttons */
+button {
+    background-color: #004792;
+    color: #ffffff;
+    border: none;
+    padding: 12px 25px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #005eb8;
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    background-color: #555573;
+    cursor: not-allowed;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #33334d;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-content h2 {
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #e0e0eb;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="checkbox"] {
+    padding: 12px;
+    background-color: #4b4b7c;
+    border: 1px solid #555573;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 14px;
+    width: calc(100% - 24px);
+}
+
+/* Headers */
+h1, h2 {
+    color: #ffffff;
+    font-weight: 500;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5em;
+}
+
+h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+/* Tooltips */
+.tooltip {
+    position: absolute;
+    background-color: #29293d;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #e0e0eb;
+    z-index: 1000;
+    max-width: 200px;
+    font-size: 14px;
+}
+
+.tooltip p {
+    margin: 5px 0;
+}
+
+/* Display Items */
+.display-item {
+    background-color: #33334d;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.display-item span {
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.parking-spots-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.parking-spot {
+    position: relative;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    color: #fff;
+    background-color: #1976D2;
+    border: 2px solid #0D47A1;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+}
+
+.parking-spot.occupied {
+    background-color: #616161;
+    border: 2px solid #424242;
+}
+
+.parking-spot.user-parked {
+    background-color: #4CAF50;
+    border: 2px solid #388E3C;
+}
+
+.parking-spot:hover .tooltip {
+    display: block;
+}
+
+.parking-spot-icon {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
