@@ -65,7 +65,6 @@ const EmployeeDashboard = () => {
         setNotificationModalOpen(true); // Show notification modal
       });
 
-      // Listen for gate status changes
       stompClient.subscribe('/topic/gates', (message) => {
         const updatedGate = JSON.parse(message.body);
         setGates(prevGates => prevGates.map(gate => gate.id === updatedGate.id ? updatedGate : gate));
@@ -74,13 +73,19 @@ const EmployeeDashboard = () => {
       stompClient.subscribe('/topic/parkingSpots', (message) => {
         const updatedSpot = JSON.parse(message.body);
         setParkingSpots(prevSpots => prevSpots.map(spot => spot.id === updatedSpot.id ? updatedSpot : spot));
+
+        if (updatedSpot.id === userParkingSpotId && !updatedSpot.occupied) {
+          setParkingModalOpen(false);
+          setBackgroundDimmed(false);
+          setUserParkingSpotId(null);
+        }
       });
     });
 
     return () => {
       if (stompClient) stompClient.disconnect();
     };
-  }, []);
+  }, [userParkingSpotId]);
 
   useEffect(() => {
     const availableSpots = parkingSpots.filter(
@@ -156,12 +161,19 @@ const EmployeeDashboard = () => {
     setSelectedFloor(event.target.value);
   };
 
-  const getFloorAndSpot = (spotId) => {
-    const floor = Math.floor(spotId / 100);
-    const spotNumber = spotId % 100;
+  const getFloorAndSpot = (spotNumber) => {
+    if (!spotNumber) return { floor: '', spotNumber: '' };
+
+    const floor = spotNumber.charAt(0); // First digit is the floor
+    let spot = spotNumber.slice(1); // Remaining digits are the spot number
+
+    if (spot.startsWith("0")) {
+      spot = spot.charAt(1); // Remove leading zero for spots 01-09
+    }
+
     return {
-      floor,
-      spotNumber: spotNumber < 10 ? spotNumber : spotNumber,
+      floor: floor,
+      spotNumber: spot,
     };
   };
 
@@ -235,31 +247,26 @@ const EmployeeDashboard = () => {
 
       <Modal
         open={parkingModalOpen}
-        onClose={() => {
-          setParkingModalOpen(false);
-          setBackgroundDimmed(false);
-        }}
+        onClose={() => {}}
         aria-labelledby="parked-modal-title"
         aria-describedby="parked-modal-description"
       >
         <div className="parking-modal-content">
-          {userParkingSpotId && (
-            <>
-              <div className="floor-display">
-                Floor {getFloorAndSpot(userParkingSpotId).floor}
-              </div>
-              <div className="spot-display">
-                Spot {getFloorAndSpot(userParkingSpotId).spotNumber}
-              </div>
-              <Button
-                variant="contained"
-                className="parking-button green"
-                onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}
-              >
-                Leave Spot
-              </Button>
-            </>
-          )}
+          <>
+            <div className="floor-display">
+              Floor {getFloorAndSpot(parkingSpots.find(spot => spot.id === userParkingSpotId)?.spotNumber).floor}
+            </div>
+            <div className="spot-display">
+              Spot {getFloorAndSpot(parkingSpots.find(spot => spot.id === userParkingSpotId)?.spotNumber).spotNumber}
+            </div>
+            <Button
+              variant="contained"
+              className="parking-button green"
+              onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}
+            >
+              Leave Spot
+            </Button>
+          </>
         </div>
       </Modal>
 
