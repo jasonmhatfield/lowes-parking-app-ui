@@ -1,20 +1,19 @@
-/* Manage Gates Modal */
-.modal-header {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #fff;
+.managed-gates-modal-content {
+    background-color: #262635;
+    padding: 20px 30px;
+    border-radius: 12px;
 }
 
-.modal-body {
+.manage-gates-modal-body {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0 20px; /* Add padding to prevent overflow */
-    max-height: 250px; /* Set a maximum height for the modal body */
-    overflow-y: auto; /* Allow scrolling if content exceeds max height */
+    padding: 0 20px;
+    max-height: 450px;
+    max-width: 550px;
+    overflow-y: auto;
 }
 
 /* Gate Item Styling */
@@ -25,18 +24,18 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    width: 250px; /* Adjusted the width to better fit the modal */
+    width: 250px;
     max-width: 400px;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .gate-item-open {
-    background-color: #9fdaa1; /* Light green for open */
+    background-color: #9fdaa1;
 }
 
 .gate-item-closed {
-    background-color: #ef9a9a; /* Light red for closed */
+    background-color: #ef9a9a;
 }
 
 .gate-name {
@@ -45,12 +44,12 @@
 }
 
 .gate-icon {
-    font-size: 2rem; /* Reduced size for better balance */
-    color: #4CAF50; /* Default color for open */
+    font-size: 2rem;
+    color: #4CAF50;
 }
 
 .gate-item-closed .gate-icon {
-    color: #D32F2F; /* Red for closed */
+    color: #D32F2F;
 }
 
 /* Modal Footer */
@@ -70,13 +69,5 @@
     color: #ffffff;
     transition: background-color 0.3s ease;
     margin: 0 auto;
-}
-
-.modal-footer .close-button:hover {
-    background-color: #0056b3;
-}
-
-.modal-content {
-    height: auto; /* Set height to auto for flexibility */
-    width: 350px; /* Set a fixed width for consistency */
+    max-width: 150px;
 }

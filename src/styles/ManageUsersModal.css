@@ -1,15 +1,17 @@
 /* Manage Users Modal */
-.modal-header {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 20px;
+.manage-users-modal-content {
+    background-color: #262635;
+    padding: 20px 30px;
+    border-radius: 12px;
+    height: 610px;
+    width: 400px;
 }
 
-.modal-body {
-    margin-bottom: 20px;
+.manage-users-modal-body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 515px;
 }
 
 .search-input {
@@ -17,7 +19,7 @@
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #555573;
-    color: #ffffff;
+    color: #000000;
     font-size: 14px;
     box-sizing: border-box;
     margin-bottom: 10px;

@@ -7,9 +7,6 @@ import Button from './Button';
 import { useNavigate } from "react-router-dom";
 import '../styles/AdminDashboard.css';
 import '../styles/Button.css';
-import '../styles/Modal.css';
-import '../styles/ManageParkingSpacesModal.css';
-import '../styles/ManageGatesModal.css';
 
 const AdminDashboard = () => {
   const [showGatesModal, setShowGatesModal] = useState(false);

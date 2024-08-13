@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
@@ -6,11 +6,8 @@ import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import {Stomp} from '@stomp/stompjs';
 import '../styles/ManageParkingSpacesModal.css';
-import '../styles/Modal.css';
-import '../styles/Button.css';
-
 
 const ManageParkingSpacesModal = ({ onClose }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
@@ -97,50 +94,52 @@ const ManageParkingSpacesModal = ({ onClose }) => {
 
   return (
     <Modal open={true} onClose={onClose}>
-      <div className="modal-header">Manage Parking Spaces</div>
-      <div className="modal-body">
-        <div className="filter-buttons">
-          <Button onClick={() => setFilter('all')} className={filter === 'all' ? 'active-filter' : ''}>All</Button>
-          <Button onClick={() => setFilter('occupied')} className={filter === 'occupied' ? 'active-filter' : ''}>Occupied</Button>
-          <Button onClick={() => setFilter('available')} className={filter === 'available' ? 'active-filter' : ''}>Available</Button>
-        </div>
-        <div className="parking-table-container">
-          <table className="parking-table">
-            <thead>
-            <tr>
-              <th>Spot Number</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Employee</th> {/* Renamed column */}
-              <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            {filteredParkingSpots.map(spot => (
-              <tr key={spot.id}>
-                <td>{spot.spotNumber}</td>
-                <td>{getIconForSpot(spot)}</td>
-                <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
-                <td>{spot.userId ? userMap[spot.userId] : ''}</td> {/* Display employee name */}
-                <td>
-                  {spot.occupied ? (
-                    <Button
-                      onClick={() => handleRemoveUserFromSpot(spot.id)}
-                      disabled={updating}
-                      className="remove-button"
-                    >
-                      Remove
-                    </Button>
-                  ) : null}
-                </td>
+      <div className = "managed-parking-spaces-modal-content">
+        <div className="modal-header">Manage Parking Spaces</div>
+        <div className="managed-parking-spaces-modal-body">
+          <div className="filter-buttons">
+            <Button onClick={() => setFilter('all')} className={filter === 'all' ? 'active-filter' : ''}>All</Button>
+            <Button onClick={() => setFilter('occupied')} className={filter === 'occupied' ? 'active-filter' : ''}>Occupied</Button>
+            <Button onClick={() => setFilter('available')} className={filter === 'available' ? 'active-filter' : ''}>Available</Button>
+          </div>
+          <div className="parking-table-container">
+            <table className="parking-table">
+              <thead>
+              <tr>
+                <th>Spot Number</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Employee</th> {/* Renamed column */}
+                <th>Action</th>
               </tr>
-            ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+              {filteredParkingSpots.map(spot => (
+                <tr key={spot.id}>
+                  <td>{spot.spotNumber}</td>
+                  <td>{getIconForSpot(spot)}</td>
+                  <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
+                  <td>{spot.userId ? userMap[spot.userId] : ''}</td> {/* Display employee name */}
+                  <td>
+                    {spot.occupied ? (
+                      <Button
+                        onClick={() => handleRemoveUserFromSpot(spot.id)}
+                        disabled={updating}
+                        className="remove-button"
+                      >
+                        Remove
+                      </Button>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div className="modal-footer">
-        <Button className="close-button" onClick={onClose}>Close</Button>
+        <div className="modal-footer">
+          <Button className="close-button" onClick={onClose}>Close</Button>
+        </div>
       </div>
     </Modal>
   );

@@ -3,8 +3,6 @@ import EditUserModal from './EditUserModal';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import '../styles/ManageUsersModal.css';
-import '../styles/Modal.css';
-import '../styles/Button.css';
 
 const ManageUsersModal = ({ onClose }) => {
   const [users, setUsers] = useState([]);
@@ -60,58 +58,60 @@ const ManageUsersModal = ({ onClose }) => {
 
   return (
     <Modal open={true} onClose={onClose}>
-      <div className="modal-header">Manage Users</div>
-      <div className="modal-body">
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="search-input"
-        />
-        <div className="sort-buttons">
-          <Button onClick={() => handleSort('firstName')} className="sort-button">Sort by First Name</Button>
-          <Button onClick={() => handleSort('lastName')} className="sort-button">Sort by Last Name</Button>
-        </div>
-        <div className="scrollable-list">
-          {filteredUsers.map(user => (
-            <div
-              key={user.id}
-              className="display-item"
-              onClick={() => handleEditUser(user)}
-            >
-              <span>{user.firstName} {user.lastName}</span>
-            </div>
-          ))}
-        </div>
-
-        {showEditModal && (
-          <EditUserModal
-            user={currentUser}
-            onClose={() => setShowEditModal(false)}
-            onSave={async (editedUser) => {
-              try {
-                const response = await fetch(`http://localhost:8080/api/users/${editedUser.id}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(editedUser),
-                });
-
-                if (response.ok) {
-                  await fetchUsers();
-                  setShowEditModal(false);
-                } else {
-                  console.error('Error saving user');
-                }
-              } catch (error) {
-                console.error('Error saving user:', error);
-              }
-            }}
+      <div className = "manage-users-modal-content">
+        <div className = "modal-header">Manage Users</div>
+        <div className = "manage-users-modal-body">
+          <input
+            type = "text"
+            placeholder = "Search users..."
+            value = {searchTerm}
+            onChange = {handleSearch}
+            className = "search-input"
           />
-        )}
-      </div>
-      <div className="modal-footer">
-        <Button className="close-button" onClick={onClose}>Close</Button>
+          <div className = "sort-buttons">
+            <Button onClick = {() => handleSort('firstName')} className = "sort-button">Sort by First Name</Button>
+            <Button onClick = {() => handleSort('lastName')} className = "sort-button">Sort by Last Name</Button>
+          </div>
+          <div className = "scrollable-list">
+            {filteredUsers.map(user => (
+              <div
+                key = {user.id}
+                className = "display-item"
+                onClick = {() => handleEditUser(user)}
+              >
+                <span>{user.firstName} {user.lastName}</span>
+              </div>
+            ))}
+          </div>
+
+          {showEditModal && (
+            <EditUserModal
+              user = {currentUser}
+              onClose = {() => setShowEditModal(false)}
+              onSave = {async (editedUser) => {
+                try {
+                  const response = await fetch(`http://localhost:8080/api/users/${editedUser.id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(editedUser),
+                  });
+
+                  if (response.ok) {
+                    await fetchUsers();
+                    setShowEditModal(false);
+                  } else {
+                    console.error('Error saving user');
+                  }
+                } catch (error) {
+                  console.error('Error saving user:', error);
+                }
+              }}
+            />
+          )}
+        </div>
+        <div className = "modal-footer">
+          <Button className = "close-button" onClick = {onClose}>Close</Button>
+        </div>
       </div>
     </Modal>
   );

@@ -1,41 +1,22 @@
-/* Manage Parking Spaces Modal */
-.modal-header {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 20px;
+.managed-parking-spaces-modal-content {
+    background-color: #262635;
+    padding: 20px 30px;
+    border-radius: 12px;
+    width: 700px;
 }
 
-.modal-body {
-    padding: 10px;
-    height: 450px;
+.managed-parking-spaces-modal-body {
     display: flex;
     flex-direction: column;
-}
-
-.filter-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    padding: 5px 0;
+    align-items: center;
+    margin-bottom: 20px;
+    height: 500px;
 }
 
 .filter-buttons button {
-    flex: 1;
-    margin-right: 10px;
-    padding: 8px;
-    border-radius: 5px;
-    border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    color: #ffffff;
-    background-color: #555573;
-}
-
-.filter-buttons button:last-child {
-    margin-right: 0;
+    width: 100px;
 }
 
 .filter-buttons .active-filter {
@@ -100,20 +81,6 @@
 .remove-button:disabled {
     background-color: #b0bec5;
     cursor: not-allowed;
-}
-
-.close-button {
-    background-color: #d32f2f;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.close-button:hover {
-    background-color: #c62828;
 }
 
 /* Improved scrollbar styling */

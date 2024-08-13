@@ -44,23 +44,25 @@ const ManageGatesModal = ({ onClose }) => {
 
   return (
     <Modal open={true} onClose={onClose}>
-      <div className="modal-header">Manage Gates</div>
-      <div className="modal-body">
-        {gates.map(gate => (
-          <div
-            key={gate.id}
-            className={`gate-item ${gate.operational ? 'gate-item-open' : 'gate-item-closed'}`}
-            onClick={() => handleGateToggle(gate.id, gate.operational)}
-          >
-            <span className="gate-name">{gate.gateName}</span>
-            <div className="gate-icon">
-              {gate.operational ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />}
+      <div className = "managed-gates-modal-content">
+        <div className = "modal-header">Manage Gates</div>
+        <div className = "manage-gates-modal-body">
+          {gates.map(gate => (
+            <div
+              key = {gate.id}
+              className = {`gate-item ${gate.operational ? 'gate-item-open' : 'gate-item-closed'}`}
+              onClick = {() => handleGateToggle(gate.id, gate.operational)}
+            >
+              <span className = "gate-name">{gate.gateName}</span>
+              <div className = "gate-icon">
+                {gate.operational ? <LockOpenIcon fontSize = "inherit"/> : <LockIcon fontSize = "inherit"/>}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      <div className="modal-footer">
-        <button className="close-button" onClick={onClose}>Close</button>
+          ))}
+        </div>
+        <div className = "modal-footer">
+          <button className = "close-button" onClick = {onClose}>Close</button>
+        </div>
       </div>
     </Modal>
   );
