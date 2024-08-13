@@ -7,7 +7,6 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import '../styles/ManageParkingSpacesModal.css';
 
 const ManageParkingSpacesModal = ({ onClose }) => {
   const [parkingSpots, setParkingSpots] = useState([]);

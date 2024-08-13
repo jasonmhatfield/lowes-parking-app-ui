@@ -1,6 +1,5 @@
 import React from 'react';
 import Button from './Button';
-import '../styles/DashboardActions.css';
 
 const DashboardActions = ({ onManageGates, onManageParking, onManageUsers, onAddUser }) => (
   <div className="dashboard-actions">

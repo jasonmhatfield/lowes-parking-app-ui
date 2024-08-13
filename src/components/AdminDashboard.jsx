@@ -4,7 +4,6 @@ import ManageParkingSpacesModal from '../modals/ManageParkingSpacesModal';
 import ManageUsersModal from '../modals/ManageUsersModal';
 import AddUserModal from '../modals/AddUserModal';
 import Button from './Button';
-import '../styles/AdminDashboard.css';
 import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
