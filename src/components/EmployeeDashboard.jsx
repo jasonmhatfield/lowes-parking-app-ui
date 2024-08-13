@@ -25,7 +25,11 @@ const EmployeeDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser')); // Check sessionStorage
+    if (!loggedInUser) {
+      navigate('/');
+      return;
+    }
     setUser(loggedInUser);
 
     const fetchData = async () => {
@@ -73,10 +77,8 @@ const EmployeeDashboard = () => {
       stompClient.subscribe('/topic/parkingSpots', (message) => {
         const updatedSpot = JSON.parse(message.body);
         setParkingSpots(prevSpots => prevSpots.map(spot => spot.id === updatedSpot.id ? updatedSpot : spot));
-
-        if (updatedSpot.id === userParkingSpotId && !updatedSpot.occupied) {
+        if (updatedSpot.userId !== user.id && userParkingSpotId === updatedSpot.id) {
           setParkingModalOpen(false);
-          setBackgroundDimmed(false);
           setUserParkingSpotId(null);
         }
       });
@@ -85,20 +87,10 @@ const EmployeeDashboard = () => {
     return () => {
       if (stompClient) stompClient.disconnect();
     };
-  }, [userParkingSpotId]);
-
-  useEffect(() => {
-    const availableSpots = parkingSpots.filter(
-      (spot) =>
-        spot.spotNumber.startsWith(selectedFloor) &&
-        !spot.occupied &&
-        canParkInSpot(spot)
-    ).length;
-    setAvailableSpotsCount(availableSpots);
-  }, [parkingSpots, selectedFloor]);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
+    sessionStorage.removeItem('loggedInUser'); // Clear sessionStorage on logout
     navigate('/');
   };
 
@@ -161,19 +153,12 @@ const EmployeeDashboard = () => {
     setSelectedFloor(event.target.value);
   };
 
-  const getFloorAndSpot = (spotNumber) => {
-    if (!spotNumber) return { floor: '', spotNumber: '' };
-
-    const floor = spotNumber.charAt(0); // First digit is the floor
-    let spot = spotNumber.slice(1); // Remaining digits are the spot number
-
-    if (spot.startsWith("0")) {
-      spot = spot.charAt(1); // Remove leading zero for spots 01-09
-    }
-
+  const getFloorAndSpot = (spotId) => {
+    const floor = Math.floor(spotId / 100);
+    const spotNumber = spotId % 100;
     return {
-      floor: floor,
-      spotNumber: spot,
+      floor,
+      spotNumber: spotNumber < 10 ? spotNumber : spotNumber,
     };
   };
 
@@ -247,26 +232,31 @@ const EmployeeDashboard = () => {
 
       <Modal
         open={parkingModalOpen}
-        onClose={() => {}}
+        onClose={() => {
+          setParkingModalOpen(false);
+          setBackgroundDimmed(false);
+        }}
         aria-labelledby="parked-modal-title"
         aria-describedby="parked-modal-description"
       >
         <div className="parking-modal-content">
-          <>
-            <div className="floor-display">
-              Floor {getFloorAndSpot(parkingSpots.find(spot => spot.id === userParkingSpotId)?.spotNumber).floor}
-            </div>
-            <div className="spot-display">
-              Spot {getFloorAndSpot(parkingSpots.find(spot => spot.id === userParkingSpotId)?.spotNumber).spotNumber}
-            </div>
-            <Button
-              variant="contained"
-              className="parking-button green"
-              onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}
-            >
-              Leave Spot
-            </Button>
-          </>
+          {userParkingSpotId && (
+            <>
+              <div className="floor-display">
+                Floor {getFloorAndSpot(userParkingSpotId).floor}
+              </div>
+              <div className="spot-display">
+                Spot {getFloorAndSpot(userParkingSpotId).spotNumber}
+              </div>
+              <Button
+                variant="contained"
+                className="parking-button green"
+                onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}
+              >
+                Leave Spot
+              </Button>
+            </>
+          )}
         </div>
       </Modal>
 

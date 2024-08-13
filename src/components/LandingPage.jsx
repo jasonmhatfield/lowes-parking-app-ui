@@ -22,7 +22,7 @@ const LandingPage = () => {
   }, []);
 
   const handleLogin = (user) => {
-    localStorage.setItem('loggedInUser', JSON.stringify(user));
+    sessionStorage.setItem('loggedInUser', JSON.stringify(user)); // Use sessionStorage
     if (user.role === 'admin') {
       navigate('/admin-dashboard');
     } else {
