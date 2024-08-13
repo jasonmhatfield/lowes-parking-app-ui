@@ -3,6 +3,7 @@
     font-size: 1.5em;
     font-weight: bold;
     margin-bottom: 20px;
+    color: #fff;
 }
 
 .modal-body {
@@ -10,46 +11,72 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    padding: 0 20px; /* Add padding to prevent overflow */
+    max-height: 250px; /* Set a maximum height for the modal body */
+    overflow-y: auto; /* Allow scrolling if content exceeds max height */
 }
 
-.display-item {
-    background-color: #33334d;
-    padding: 10px 15px;
+/* Gate Item Styling */
+.gate-item {
+    padding: 15px 25px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    width: 250px; /* Adjusted the width to better fit the modal */
+    max-width: 400px;
+    cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    width: 100%;
-    text-align: center;
 }
 
-.display-item span {
-    font-size: 14px;
+.gate-item-open {
+    background-color: #9fdaa1; /* Light green for open */
+}
+
+.gate-item-closed {
+    background-color: #ef9a9a; /* Light red for closed */
+}
+
+.gate-name {
+    font-size: 1.5em;
     color: #ffffff;
 }
 
+.gate-icon {
+    font-size: 2rem; /* Reduced size for better balance */
+    color: #4CAF50; /* Default color for open */
+}
+
+.gate-item-closed .gate-icon {
+    color: #D32F2F; /* Red for closed */
+}
+
+/* Modal Footer */
 .modal-footer {
     display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
+    justify-content: center;
+    margin-top: 20px;
 }
 
-.modal-footer .close-button,
-.modal-footer .submit-button {
-    width: 45%;
-    padding: 8px;
+.modal-footer .close-button {
+    padding: 10px 20px;
+    border-radius: 8px;
     border: none;
-    border-radius: 5px;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
-    background: #1976D2;
+    background-color: #007bff;
     color: #ffffff;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: background-color 0.3s ease;
+    margin: 0 auto;
 }
 
-.modal-footer .close-button:hover,
-.modal-footer .submit-button:hover {
-    background-color: #005eb8;
+.modal-footer .close-button:hover {
+    background-color: #0056b3;
+}
+
+.modal-content {
+    height: auto; /* Set height to auto for flexibility */
+    width: 350px; /* Set a fixed width for consistency */
 }

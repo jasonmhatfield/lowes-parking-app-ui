@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../components/Modal';
-import Button from '../components/Button';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import LockIcon from '@mui/icons-material/Lock';
 import '../styles/ManageGatesModal.css';
-import '../styles/Modal.css';
-import '../styles/Button.css';
 
 const ManageGatesModal = ({ onClose }) => {
   const [gates, setGates] = useState([]);
@@ -48,17 +47,20 @@ const ManageGatesModal = ({ onClose }) => {
       <div className="modal-header">Manage Gates</div>
       <div className="modal-body">
         {gates.map(gate => (
-          <div key={gate.id} className="display-item">
-            <span>Gate: {gate.gateName}</span>
-            <span>Status: {gate.operational ? 'Open' : 'Closed'}</span>
-            <Button onClick={() => handleGateToggle(gate.id, gate.operational)} disabled={updating}>
-              {gate.operational ? 'Close' : 'Open'}
-            </Button>
+          <div
+            key={gate.id}
+            className={`gate-item ${gate.operational ? 'gate-item-open' : 'gate-item-closed'}`}
+            onClick={() => handleGateToggle(gate.id, gate.operational)}
+          >
+            <span className="gate-name">{gate.gateName}</span>
+            <div className="gate-icon">
+              {gate.operational ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />}
+            </div>
           </div>
         ))}
       </div>
       <div className="modal-footer">
-        <Button className="close-button" onClick={onClose}>Close</Button>
+        <button className="close-button" onClick={onClose}>Close</button>
       </div>
     </Modal>
   );
