@@ -1,21 +1,53 @@
-.modal-header {
-    font-size: 1.75rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 1rem;
-    color: #fff;
+.modal-body {
+    padding: 10px;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
 }
 
-.modal-body {
-    padding: 20px;
-    max-height: 400px;
+.filter-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px; /* Reduced margin */
+    position: sticky;
+    top: 0;
+    background-color: #1a1a2e;
+    z-index: 2;
+    padding: 5px 0; /* Adjusted padding */
+}
+
+.filter-buttons button {
+    flex: 1;
+    margin-right: 10px;
+    padding: 8px; /* Reduced padding */
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: #ffffff;
+    background-color: #555573; /* Default color for non-active filters */
+}
+
+.filter-buttons button:last-child {
+    margin-right: 0;
+}
+
+.filter-buttons .active-filter {
+    background-color: #1976D2; /* Active color for selected filter */
+}
+
+.filter-buttons button:hover {
+    background-color: #374785; /* Hover effect for the buttons */
+}
+
+.parking-table-container {
+    flex: 1;
     overflow-y: auto;
 }
 
 .parking-table {
-    width: 100%;
+    width: 600px;
     border-collapse: collapse;
-    margin-bottom: 20px;
     background-color: #252525;
     border-radius: 8px;
     overflow: hidden;
@@ -23,14 +55,16 @@
 
 .parking-table th,
 .parking-table td {
-    padding: 12px 15px;
+    padding: 8px 10px; /* Reduced padding */
     text-align: center;
 }
 
-.parking-table th {
+.parking-table thead th {
+    position: sticky;
+    top: 0; /* Fix the header to the top */
     background-color: #3a3a3a;
-    color: #fff;
-    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5); /* Shadow to emphasize the sticky header */
 }
 
 .parking-table td {
@@ -84,4 +118,23 @@
 .modal-footer .close-button {
     width: 100%;
     max-width: 200px;
+}
+
+/* Improved scrollbar styling */
+.parking-table-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.parking-table-container::-webkit-scrollbar-track {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+}
+
+.parking-table-container::-webkit-scrollbar-thumb {
+    background-color: #555573;
+    border-radius: 10px;
+}
+
+.parking-table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #3a3a3a;
 }

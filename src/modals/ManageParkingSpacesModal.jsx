@@ -13,6 +13,7 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
   const [userMap, setUserMap] = useState({});
   const [updating, setUpdating] = useState(false);
+  const [filter, setFilter] = useState('all'); // Filter state: 'all', 'occupied', 'available'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,8 +38,6 @@ const ManageParkingSpacesModal = ({ onClose }) => {
     const stompClient = Stomp.over(socket);
 
     stompClient.connect({}, () => {
-      console.log("Connected to WebSocket for Admin Dashboard");
-
       stompClient.subscribe('/topic/parkingSpots', (message) => {
         const updatedSpot = JSON.parse(message.body);
         setParkingSpots(prevSpots =>
@@ -53,7 +52,6 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   }, []);
 
   const handleRemoveUserFromSpot = async (spotId) => {
-    console.log(`Attempting to remove user from spot: ${spotId}`);
     setUpdating(true);
     try {
       const response = await fetch(`http://localhost:8080/api/parkingSpots/${spotId}`, {
@@ -88,42 +86,55 @@ const ManageParkingSpacesModal = ({ onClose }) => {
     }
   };
 
+  const filteredParkingSpots = parkingSpots.filter(spot => {
+    if (filter === 'occupied') return spot.occupied;
+    if (filter === 'available') return !spot.occupied;
+    return true; // 'all'
+  });
+
   return (
     <Modal open={true} onClose={onClose}>
       <div className="modal-header">Manage Parking Spaces</div>
       <div className="modal-body">
-        <table className="parking-table">
-          <thead>
-          <tr>
-            <th>Spot Number</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>User</th>
-            <th>Action</th>
-          </tr>
-          </thead>
-          <tbody>
-          {parkingSpots.map(spot => (
-            <tr key={spot.id}>
-              <td>{spot.spotNumber}</td>
-              <td>{getIconForSpot(spot)}</td>
-              <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
-              <td>{spot.occupied ? userMap[spot.userId] : 'Empty'}</td>
-              <td>
-                {spot.occupied ? (
-                  <Button
-                    onClick={() => handleRemoveUserFromSpot(spot.id)}
-                    disabled={updating}
-                    className="remove-button"
-                  >
-                    Remove
-                  </Button>
-                ) : null}
-              </td>
+        <div className="filter-buttons">
+          <Button onClick={() => setFilter('all')} className={filter === 'all' ? 'active-filter' : ''}>All</Button>
+          <Button onClick={() => setFilter('occupied')} className={filter === 'occupied' ? 'active-filter' : ''}>Occupied</Button>
+          <Button onClick={() => setFilter('available')} className={filter === 'available' ? 'active-filter' : ''}>Available</Button>
+        </div>
+        <div className="parking-table-container">
+          <table className="parking-table">
+            <thead>
+            <tr>
+              <th>Spot Number</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Employee</th> {/* Renamed column */}
+              <th>Action</th>
             </tr>
-          ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+            {filteredParkingSpots.map(spot => (
+              <tr key={spot.id}>
+                <td>{spot.spotNumber}</td>
+                <td>{getIconForSpot(spot)}</td>
+                <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
+                <td>{spot.userId ? userMap[spot.userId] : ''}</td> {/* Display employee name */}
+                <td>
+                  {spot.occupied ? (
+                    <Button
+                      onClick={() => handleRemoveUserFromSpot(spot.id)}
+                      disabled={updating}
+                      className="remove-button"
+                    >
+                      Remove
+                    </Button>
+                  ) : null}
+                </td>
+              </tr>
+            ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       <div className="modal-footer">
         <Button className="close-button" onClick={onClose}>Close</Button>
