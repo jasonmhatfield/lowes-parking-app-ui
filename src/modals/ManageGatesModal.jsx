@@ -1,8 +1,9 @@
+// src/modals/ManageGatesModal.jsx
 import React, { useState, useEffect } from 'react';
-import Modal from '../components/Modal';
+import styled from 'styled-components';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
-import '../styles/ManageGatesModal.css';
+import Modal from '../components/Modal';
 
 const ManageGatesModal = ({ onClose }) => {
   const [gates, setGates] = useState([]);
@@ -44,28 +45,102 @@ const ManageGatesModal = ({ onClose }) => {
 
   return (
     <Modal open={true} onClose={onClose}>
-      <div className = "managed-gates-modal-content">
-        <div className = "modal-header">Manage Gates</div>
-        <div className = "manage-gates-modal-body">
+      <ModalContent>
+        <ModalHeader>Manage Gates</ModalHeader>
+        <ModalBody>
           {gates.map(gate => (
-            <div
-              key = {gate.id}
-              className = {`gate-item ${gate.operational ? 'gate-item-open' : 'gate-item-closed'}`}
-              onClick = {() => handleGateToggle(gate.id, gate.operational)}
+            <GateItem
+              key={gate.id}
+              operational={gate.operational}
+              onClick={() => handleGateToggle(gate.id, gate.operational)}
             >
-              <span className = "gate-name">{gate.gateName}</span>
-              <div className = "gate-icon">
-                {gate.operational ? <LockOpenIcon fontSize = "inherit"/> : <LockIcon fontSize = "inherit"/>}
-              </div>
-            </div>
+              <GateName>{gate.gateName}</GateName>
+              <GateIcon operational={gate.operational}>
+                {gate.operational ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />}
+              </GateIcon>
+            </GateItem>
           ))}
-        </div>
-        <div className = "modal-footer">
-          <button className = "close-button" onClick = {onClose}>Close</button>
-        </div>
-      </div>
+        </ModalBody>
+        <ModalFooter>
+          <CloseButton onClick={onClose}>Close</CloseButton>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };
+
+const ModalContent = styled.div`
+    background-color: #1e1e2f;
+    padding: 20px;
+    border-radius: 12px;
+    width: 360px;
+    height: 400px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+`;
+
+const ModalHeader = styled.div`
+    font-size: 1.8rem;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+`;
+
+const ModalBody = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: calc(100% - 100px);
+    overflow-y: auto;
+`;
+
+const GateItem = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: ${({ operational }) => (operational ? '#4caf50' : '#f44336')};
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+`;
+
+const GateName = styled.span`
+    font-size: 1rem;
+    color: #ffffff;
+`;
+
+const GateIcon = styled.div`
+    font-size: 1.5rem;
+    color: ${({ operational }) => (operational ? '#ffffff' : '#ffffff')};
+`;
+
+const ModalFooter = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+`;
+
+const CloseButton = styled.button`
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #1976D2;
+    color: #ffffff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+
+    &:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+`;
 
 export default ManageGatesModal;

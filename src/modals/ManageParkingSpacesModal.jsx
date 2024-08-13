@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+// src/modals/ManageParkingSpacesModal.jsx
+import React, { useEffect, useState } from 'react';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
@@ -6,14 +7,14 @@ import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import SockJS from 'sockjs-client';
-import {Stomp} from '@stomp/stompjs';
-import '../styles/ManageParkingSpacesModal.css';
+import { Stomp } from '@stomp/stompjs';
+import styled from 'styled-components';
 
 const ManageParkingSpacesModal = ({ onClose }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
   const [userMap, setUserMap] = useState({});
   const [updating, setUpdating] = useState(false);
-  const [filter, setFilter] = useState('all'); // Filter state: 'all', 'occupied', 'available'
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +42,7 @@ const ManageParkingSpacesModal = ({ onClose }) => {
       stompClient.subscribe('/topic/parkingSpots', (message) => {
         const updatedSpot = JSON.parse(message.body);
         setParkingSpots(prevSpots =>
-          prevSpots.map(spot => spot.id === updatedSpot.id ? updatedSpot : spot)
+          prevSpots.map(spot => (spot.id === updatedSpot.id ? updatedSpot : spot))
         );
       });
     });
@@ -62,7 +63,7 @@ const ManageParkingSpacesModal = ({ onClose }) => {
 
       if (response.ok) {
         const updatedSpot = await response.json();
-        setParkingSpots(parkingSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
+        setParkingSpots(parkingSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s)));
       } else {
         console.error('Error removing user from spot.');
       }
@@ -89,27 +90,27 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   const filteredParkingSpots = parkingSpots.filter(spot => {
     if (filter === 'occupied') return spot.occupied;
     if (filter === 'available') return !spot.occupied;
-    return true; // 'all'
+    return true;
   });
 
   return (
     <Modal open={true} onClose={onClose}>
-      <div className = "managed-parking-spaces-modal-content">
-        <div className="modal-header">Manage Parking Spaces</div>
-        <div className="managed-parking-spaces-modal-body">
-          <div className="filter-buttons">
-            <Button onClick={() => setFilter('all')} className={filter === 'all' ? 'active-filter' : ''}>All</Button>
-            <Button onClick={() => setFilter('occupied')} className={filter === 'occupied' ? 'active-filter' : ''}>Occupied</Button>
-            <Button onClick={() => setFilter('available')} className={filter === 'available' ? 'active-filter' : ''}>Available</Button>
-          </div>
-          <div className="parking-table-container">
-            <table className="parking-table">
+      <ModalContent>
+        <ModalHeader>Manage Parking Spaces</ModalHeader>
+        <ModalBody>
+          <FilterButtons>
+            <Button onClick={() => setFilter('all')} active={filter === 'all'}>All</Button>
+            <Button onClick={() => setFilter('occupied')} active={filter === 'occupied'}>Occupied</Button>
+            <Button onClick={() => setFilter('available')} active={filter === 'available'}>Available</Button>
+          </FilterButtons>
+          <ParkingTableContainer>
+            <ParkingTable>
               <thead>
               <tr>
                 <th>Spot Number</th>
                 <th>Type</th>
                 <th>Status</th>
-                <th>Employee</th> {/* Renamed column */}
+                <th>Employee</th>
                 <th>Action</th>
               </tr>
               </thead>
@@ -119,30 +120,112 @@ const ManageParkingSpacesModal = ({ onClose }) => {
                   <td>{spot.spotNumber}</td>
                   <td>{getIconForSpot(spot)}</td>
                   <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
-                  <td>{spot.userId ? userMap[spot.userId] : ''}</td> {/* Display employee name */}
+                  <td>{spot.userId ? userMap[spot.userId] : ''}</td>
                   <td>
-                    {spot.occupied ? (
+                    {spot.occupied && (
                       <Button
                         onClick={() => handleRemoveUserFromSpot(spot.id)}
                         disabled={updating}
-                        className="remove-button"
                       >
                         Remove
                       </Button>
-                    ) : null}
+                    )}
                   </td>
                 </tr>
               ))}
               </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="modal-footer">
-          <Button className="close-button" onClick={onClose}>Close</Button>
-        </div>
-      </div>
+            </ParkingTable>
+          </ParkingTableContainer>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };
+
+const ModalContent = styled.div`
+    background-color: #1e1e2f;
+    padding: 20px;
+    border-radius: 12px;
+    width: 700px;
+    max-height: 90vh; /* Limit the height of the modal */
+    overflow: hidden; /* Prevent overflow */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+`;
+
+const ModalHeader = styled.div`
+    font-size: 1.8rem;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+`;
+
+const ModalBody = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto; /* Enable vertical scrolling */
+`;
+
+const FilterButtons = styled.div`
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+
+    & > button {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    & > button:last-child {
+        margin-right: 0;
+    }
+`;
+
+const ParkingTableContainer = styled.div`
+    width: 100%;
+    overflow-x: auto;
+`;
+
+const ParkingTable = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #252525;
+    border-radius: 8px;
+    overflow: hidden;
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        color: #ffffff;
+    }
+
+    th {
+        background-color: #33334d;
+    }
+
+    td {
+        background-color: #1e1e2f;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #2a2a3b;
+    }
+
+    tr:hover td {
+        background-color: #3a3a4d;
+    }
+`;
+
+const ModalFooter = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+`;
 
 export default ManageParkingSpacesModal;

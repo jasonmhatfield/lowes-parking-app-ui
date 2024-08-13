@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+// src/modals/EditUserModal.jsx
+import React, { useState } from 'react';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
-import '../styles/EditUserModal.css';
+import styled from 'styled-components';
 
 const EditUserModal = ({ user, onClose, onSave }) => {
   const [editedUser, setEditedUser] = useState({ ...user });
@@ -32,47 +33,112 @@ const EditUserModal = ({ user, onClose, onSave }) => {
 
   return (
     <Modal open={true} onClose={onClose}>
-      <div className = "edit-user-modal-content">
-        <div className = "modal-header">Edit User</div>
-        <div className = "edit-user-modal-body">
-          <div className = "form-group">
-            <label>First Name</label>
-            <input type = "text" name = "firstName" value = {editedUser.firstName} onChange = {handleChange}/>
-          </div>
-          <div className = "form-group">
-            <label>Last Name</label>
-            <input type = "text" name = "lastName" value = {editedUser.lastName} onChange = {handleChange}/>
-          </div>
-          <div className = "form-group">
-            <label>Email</label>
-            <input type = "email" name = "email" value = {editedUser.email} onChange = {handleChange}/>
-          </div>
-          <div className = "toggle-button-group">
-            <button
-              className = {`toggle-button ${editedUser.hasHandicapPlacard ? 'active' : ''}`}
-              onClick = {() => handleToggle('hasHandicapPlacard')}
+      <ModalContent>
+        <ModalHeader>Edit User</ModalHeader>
+        <ModalBody>
+          <FormGroup>
+            <Label>First Name</Label>
+            <Input type="text" name="firstName" value={editedUser.firstName} onChange={handleChange} />
+          </FormGroup>
+          <FormGroup>
+            <Label>Last Name</Label>
+            <Input type="text" name="lastName" value={editedUser.lastName} onChange={handleChange} />
+          </FormGroup>
+          <FormGroup>
+            <Label>Email</Label>
+            <Input type="email" name="email" value={editedUser.email} onChange={handleChange} />
+          </FormGroup>
+          <ToggleGroup>
+            <ToggleButton
+              active={editedUser.hasHandicapPlacard}
+              onClick={() => handleToggle('hasHandicapPlacard')}
             >
-              <AccessibleIcon/>
-            </button>
-            <button
-              className = {`toggle-button ${editedUser.hasEv ? 'active' : ''}`}
-              onClick = {() => handleToggle('hasEv')}
+              <AccessibleIcon />
+            </ToggleButton>
+            <ToggleButton
+              active={editedUser.hasEv}
+              onClick={() => handleToggle('hasEv')}
             >
-              <EvStationIcon/>
-            </button>
-          </div>
-        </div>
-        <div className = "modal-footer">
-          <Button className = "close-button" onClick = {onClose} disabled = {saving}>
-            Cancel
-          </Button>
-          <Button className = "submit-button" onClick = {handleSave} disabled = {saving}>
+              <EvStationIcon />
+            </ToggleButton>
+          </ToggleGroup>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save'}
           </Button>
-        </div>
-      </div>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };
+
+const ModalContent = styled.div`
+  background-color: #1e1e2f;
+  padding: 20px;
+  border-radius: 12px;
+  width: 360px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+`;
+
+const ModalHeader = styled.div`
+  font-size: 1.8rem;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 20px;
+`;
+
+const ModalBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const FormGroup = styled.div`
+  width: 100%;
+  margin-bottom: 15px;
+`;
+
+const Label = styled.label`
+  display: block;
+  color: #ffffff;
+  margin-bottom: 5px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #555573;
+  background-color: #3c3c5e;
+  color: #ffffff;
+  font-size: 16px;
+`;
+
+const ToggleGroup = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 15px;
+`;
+
+const ToggleButton = styled.button`
+  width: 48%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  background-color: ${({ active }) => (active ? '#4caf50' : '#555573')};
+  color: #ffffff;
+`;
+
+const ModalFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+`;
 
 export default EditUserModal;
