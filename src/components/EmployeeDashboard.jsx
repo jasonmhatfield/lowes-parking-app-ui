@@ -1,61 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
+import EmployeeDashboardDesktop from './EmployeeDashboardDesktop';
+import EmployeeDashboardMobile from './EmployeeDashboardMobile';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
-import { Button } from '@mui/material';
-import '../styles/EmployeeDashboard.css';
+import EmployeeParkingModal from '../modals/EmployeeParkingModal';  // Import the new modal
 
 const EmployeeDashboard = () => {
   const [parkingSpots, setParkingSpots] = useState([]);
   const [gates, setGates] = useState([]);
   const [user, setUser] = useState(null);
   const [userParkingSpotId, setUserParkingSpotId] = useState(null);
+  const [selectedFloor, setSelectedFloor] = useState('1');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [parkingModalOpen, setParkingModalOpen] = useState(false);  // State to control modal visibility
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-    setUser(loggedInUser);
+  const fetchData = useCallback(async () => {
+    try {
+      const [parkingSpotsResponse, gatesResponse] = await Promise.all([
+        fetch('http://localhost:8080/api/parkingSpots'),
+        fetch('http://localhost:8080/api/gates')
+      ]);
+      const parkingSpotsData = await parkingSpotsResponse.json();
+      const gatesData = await gatesResponse.json();
 
-    const fetchData = async () => {
-      try {
-        const [parkingSpotsResponse, gatesResponse] = await Promise.all([
-          fetch('http://localhost:8080/api/parkingSpots'),
-          fetch('http://localhost:8080/api/gates')
-        ]);
+      setParkingSpots(parkingSpotsData);
+      setGates(gatesData);
 
-        const parkingSpotsData = await parkingSpotsResponse.json();
-        const gatesData = await gatesResponse.json();
-
-        setParkingSpots(parkingSpotsData);
-        setGates(gatesData);
-
-        if (loggedInUser) {
-          const userSpot = parkingSpotsData.find(spot => spot.userId === loggedInUser.id);
-          if (userSpot) setUserParkingSpotId(userSpot.id);
+      const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+      if (loggedInUser) {
+        const userSpot = parkingSpotsData.find(spot => spot.userId === loggedInUser.id);
+        if (userSpot) {
+          setUserParkingSpotId(userSpot.id);
+          setParkingModalOpen(true);  // Open modal if the user has a parking spot
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
       }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!loggedInUser) {
+      navigate('/');
+      return;
+    }
+    setUser(loggedInUser);
+    fetchData();
+
+    const socket = new SockJS('http://localhost:8080/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe('/topic/gates', (message) => {
+        const updatedGate = JSON.parse(message.body);
+        setGates(prevGates => prevGates.map(gate => gate.id === updatedGate.id ? updatedGate : gate));
+      });
+
+      stompClient.subscribe('/topic/parkingSpots', (message) => {
+        const updatedSpot = JSON.parse(message.body);
+        setParkingSpots(prevSpots =>
+          prevSpots.map(spot => spot.id === updatedSpot.id ? updatedSpot : spot)
+        );
+        if (updatedSpot.userId !== user.id && userParkingSpotId === updatedSpot.id) {
+          setUserParkingSpotId(null);
+          setParkingModalOpen(false);  // Close modal if user leaves the spot
+        }
+      });
+    });
+
+    return () => {
+      stompClient.disconnect();
+    };
+  }, [fetchData, navigate, userParkingSpotId]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
     };
 
-    fetchData();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
+    sessionStorage.removeItem('loggedInUser');
     navigate('/');
   };
 
   const handleParking = async (spot) => {
-    if (!user) return;
-
     const isLeaving = spot.id === userParkingSpotId;
-    const updates = {
-      isOccupied: !isLeaving,
-      userId: isLeaving ? null : user.id
-    };
+    const updates = { occupied: !isLeaving, userId: isLeaving ? null : user.id };
 
     try {
       const response = await fetch(`http://localhost:8080/api/parkingSpots/${spot.id}`, {
@@ -66,14 +107,30 @@ const EmployeeDashboard = () => {
 
       if (response.ok) {
         const updatedSpot = await response.json();
-        setParkingSpots(parkingSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
+        setParkingSpots(prevSpots => prevSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
         setUserParkingSpotId(isLeaving ? null : spot.id);
+        setParkingModalOpen(!isLeaving);  // Toggle modal based on parking status
       } else {
         console.error('Failed to update parking spot.');
       }
     } catch (error) {
       console.error('Error updating parking spot:', error);
     }
+  };
+
+  const getIconForSpot = (spot) => {
+    if (spot.occupied) return <DirectionsCarIcon />;
+    switch (spot.type) {
+      case 'ev': return <EvStationIcon />;
+      case 'handicap': return <AccessibleIcon />;
+      default: return <LocalParkingIcon />;
+    }
+  };
+
+  const getButtonClass = (spot) => {
+    if (spot.id === userParkingSpotId) return 'green';
+    if (spot.occupied || userParkingSpotId !== null || !canParkInSpot(spot)) return 'grey';
+    return 'blue';
   };
 
   const canParkInSpot = (spot) => {
@@ -83,54 +140,41 @@ const EmployeeDashboard = () => {
     return spot.type === 'ev' && user?.hasEv;
   };
 
-  const getIconForSpot = (spot) => {
-    if (spot.occupied) return <DirectionsCarIcon />; // Show car icon for all occupied spots, including the user's
-    switch (spot.type) {
-      case 'ev':
-        return <EvStationIcon />;
-      case 'handicap':
-        return <AccessibleIcon />;
-      default:
-        return <LocalParkingIcon />;
-    }
-  };
-
-  const getButtonClass = (spot) => {
-    if (spot.id === userParkingSpotId) return 'parking-button green';
-    if (spot.occupied || userParkingSpotId !== null || !canParkInSpot(spot)) return 'parking-button grey';
-    return 'parking-button blue';
-  };
+  const handleFloorChange = (event) => setSelectedFloor(event.target.value);
 
   return (
-    <div className="employee-dashboard">
-      {user && <h1 className="welcome-message">Welcome, {user.firstName}</h1>}
-      <Button variant="contained" onClick={handleLogout} className="logout-button">
-        Logout
-      </Button>
+    <>
+      {isMobile ? (
+        <EmployeeDashboardMobile
+          user={user}
+          parkingSpots={parkingSpots}
+          selectedFloor={selectedFloor}
+          handleFloorChange={handleFloorChange}
+          handleParking={handleParking}
+          getIconForSpot={getIconForSpot}
+          handleLogout={handleLogout}
+        />
+      ) : (
+        <EmployeeDashboardDesktop
+          user={user}
+          parkingSpots={parkingSpots}
+          gates={gates}
+          selectedFloor={selectedFloor}
+          handleFloorChange={handleFloorChange}
+          handleParking={handleParking}
+          getButtonClass={getButtonClass}
+          getIconForSpot={getIconForSpot}
+          handleLogout={handleLogout}
+        />
+      )}
 
-      <h2>Gates</h2>
-      {gates.map(gate => (
-        <div key={gate.id} className="gate-status">
-          <span>Gate: {gate.gateName}</span>
-          <span>Status: {gate.operational ? 'Open' : 'Closed'}</span>
-        </div>
-      ))}
-
-      <h2>Parking Spaces</h2>
-      <div className="parking-spaces">
-        {parkingSpots.map(spot => (
-          <Button
-            key={spot.id}
-            onClick={() => handleParking(spot)}
-            disabled={spot.id !== userParkingSpotId && (!canParkInSpot(spot) || userParkingSpotId !== null)}
-            className={getButtonClass(spot)}
-          >
-            {getIconForSpot(spot)}
-            <span>{spot.spotNumber}</span>
-          </Button>
-        ))}
-      </div>
-    </div>
+      <EmployeeParkingModal
+        open={parkingModalOpen}
+        userParkingSpotId={userParkingSpotId}
+        parkingSpots={parkingSpots}
+        handleParking={handleParking}
+      />
+    </>
   );
 };
 

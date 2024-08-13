@@ -1,77 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import Tooltip from '../components/Tooltip';
+// src/modals/ManageParkingSpacesModal.jsx
+import React, { useEffect, useState } from 'react';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
-import '../styles/ManageParkingSpacesModal.css';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
+import styled from 'styled-components';
 
 const ManageParkingSpacesModal = ({ onClose }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
-  const [hoveredSpot, setHoveredSpot] = useState(null);
-  const [tooltipVisible, setTooltipVisible] = useState(false);
   const [userMap, setUserMap] = useState({});
   const [updating, setUpdating] = useState(false);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const fetchParkingSpots = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/parkingSpots');
-        const data = await response.json();
-        console.log('Fetched Parking Spots:', data); // Log the fetched parking spots
-        setParkingSpots(data);
-        await fetchUsers(data);
-      } catch (error) {
-        console.error('Error fetching parking spots:', error);
-      }
-    };
+        const parkingSpotsResponse = await fetch('http://localhost:8080/api/parkingSpots');
+        const parkingSpotsData = await parkingSpotsResponse.json();
+        setParkingSpots(parkingSpotsData);
 
-    const fetchUsers = async (spots) => {
-      try {
-        const userIds = [...new Set(spots.filter(spot => spot.userId).map(spot => spot.userId))];
-        console.log('User IDs from Parking Spots:', userIds); // Log the user IDs
+        const userIds = [...new Set(parkingSpotsData.filter(spot => spot.userId).map(spot => spot.userId))];
         const userResponses = await Promise.all(userIds.map(id => fetch(`http://localhost:8080/api/users/${id}`)));
         const users = await Promise.all(userResponses.map(res => res.json()));
-        console.log('Fetched Users:', users); // Log the fetched users
         const userMap = users.reduce((map, user) => ({ ...map, [user.id]: `${user.firstName} ${user.lastName}` }), {});
-        console.log('User Map:', userMap); // Log the created user map
         setUserMap(userMap);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchParkingSpots();
+    fetchData();
+
+    const socket = new SockJS('http://localhost:8080/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe('/topic/parkingSpots', (message) => {
+        const updatedSpot = JSON.parse(message.body);
+        setParkingSpots(prevSpots =>
+          prevSpots.map(spot => (spot.id === updatedSpot.id ? updatedSpot : spot))
+        );
+      });
+    });
+
+    return () => {
+      if (stompClient) stompClient.disconnect();
+    };
   }, []);
-
-  const handleMouseEnter = (spot) => {
-    if (spot.isOccupied) {
-      console.log('Hovered Spot:', spot); // Log the hovered spot
-      setHoveredSpot(spot);
-      setTooltipVisible(true);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setTooltipVisible(false);
-    setHoveredSpot(null);
-  };
 
   const handleRemoveUserFromSpot = async (spotId) => {
     setUpdating(true);
     try {
-      console.log('Removing user from Spot ID:', spotId); // Log the spot ID being updated
       const response = await fetch(`http://localhost:8080/api/parkingSpots/${spotId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isOccupied: false, userId: null }),
+        body: JSON.stringify({ occupied: false, userId: null }),
       });
 
       if (response.ok) {
-        const updatedSpots = parkingSpots.map(spot => spot.id === spotId ? { ...spot, isOccupied: false, userId: null } : spot);
-        console.log('Updated Parking Spots:', updatedSpots); // Log the updated parking spots
-        setParkingSpots(updatedSpots);
-        setTooltipVisible(false);
+        const updatedSpot = await response.json();
+        setParkingSpots(parkingSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s)));
       } else {
         console.error('Error removing user from spot.');
       }
@@ -83,61 +75,157 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   };
 
   const getIconForSpot = (spot) => {
-    const iconStyle = { fontSize: '2rem', zIndex: 2 };  // Ensure icon appears above the car background
-    if (spot.isOccupied) return <DirectionsCarIcon style={{ ...iconStyle, color: '#FF5722' }} />;  // Orange car icon for occupied spots
+    const iconStyle = { fontSize: '1.5rem', zIndex: 2 };
+    if (spot.occupied) return <DirectionsCarIcon style={{ ...iconStyle, color: '#FF5722' }} />;
     switch (spot.type) {
       case 'ev':
-        return <EvStationIcon style={{ ...iconStyle, color: '#4CAF50' }} />;  // Green for EV spots
+        return <EvStationIcon style={{ ...iconStyle, color: '#4CAF50' }} />;
       case 'handicap':
-        return <AccessibleIcon style={{ ...iconStyle, color: '#FFFFFF' }} />;  // White for handicap spots
+        return <AccessibleIcon style={{ ...iconStyle, color: '#FFFFFF' }} />;
       default:
-        return <LocalParkingIcon style={{ ...iconStyle, color: '#9E9E9E' }} />;  // Grey for regular spots
+        return <LocalParkingIcon style={{ ...iconStyle, color: '#9E9E9E' }} />;
     }
   };
 
-  const getButtonClass = (spot) => {
-    if (spot.isOccupied) return 'parking-spot occupied';
-    return 'parking-spot available';
-  };
+  const filteredParkingSpots = parkingSpots.filter(spot => {
+    if (filter === 'occupied') return spot.occupied;
+    if (filter === 'available') return !spot.occupied;
+    return true;
+  });
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">Manage Parking Spaces</div>
-        <div className="modal-body">
-          <div className="parking-spots-grid">
-            {parkingSpots.map(spot => (
-              <div
-                key={spot.id}
-                className={getButtonClass(spot)}
-                onMouseEnter={() => handleMouseEnter(spot)}
-                onMouseLeave={handleMouseLeave}
-              >
-                {spot.isOccupied && <div className="background-car-icon"><DirectionsCarIcon /></div>} {/* Background car icon */}
-                {getIconForSpot(spot)}
-                <div className="spot-number">{spot.spotNumber}</div>
-                {tooltipVisible && hoveredSpot && hoveredSpot.id === spot.id && (
-                  <Tooltip>
-                    <p>{userMap[hoveredSpot.userId]}</p>
-                    <button
-                      onClick={() => handleRemoveUserFromSpot(hoveredSpot.id)}
-                      disabled={updating}
-                      style={{ backgroundColor: updating ? '#616161' : '#d32f2f', color: '#fff', padding: '8px', border: 'none', borderRadius: '4px', cursor: updating ? 'not-allowed' : 'pointer' }}
-                    >
-                      Remove User
-                    </button>
-                  </Tooltip>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button className="close-button" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
+    <Modal open={true} onClose={onClose}>
+      <ModalContent>
+        <ModalHeader>Manage Parking Spaces</ModalHeader>
+        <ModalBody>
+          <FilterButtons>
+            <Button onClick={() => setFilter('all')} active={filter === 'all'}>All</Button>
+            <Button onClick={() => setFilter('occupied')} active={filter === 'occupied'}>Occupied</Button>
+            <Button onClick={() => setFilter('available')} active={filter === 'available'}>Available</Button>
+          </FilterButtons>
+          <ParkingTableContainer>
+            <ParkingTable>
+              <thead>
+              <tr>
+                <th>Spot Number</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Employee</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              {filteredParkingSpots.map(spot => (
+                <tr key={spot.id}>
+                  <td>{spot.spotNumber}</td>
+                  <td>{getIconForSpot(spot)}</td>
+                  <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
+                  <td>{spot.userId ? userMap[spot.userId] : ''}</td>
+                  <td>
+                    {spot.occupied && (
+                      <Button
+                        onClick={() => handleRemoveUserFromSpot(spot.id)}
+                        disabled={updating}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              </tbody>
+            </ParkingTable>
+          </ParkingTableContainer>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };
+
+const ModalContent = styled.div`
+    background-color: #1e1e2f;
+    padding: 20px;
+    border-radius: 12px;
+    width: 700px;
+    max-height: 90vh; /* Limit the height of the modal */
+    overflow: hidden; /* Prevent overflow */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+`;
+
+const ModalHeader = styled.div`
+    font-size: 1.8rem;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+`;
+
+const ModalBody = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto; /* Enable vertical scrolling */
+`;
+
+const FilterButtons = styled.div`
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+
+    & > button {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    & > button:last-child {
+        margin-right: 0;
+    }
+`;
+
+const ParkingTableContainer = styled.div`
+    width: 100%;
+    overflow-x: auto;
+`;
+
+const ParkingTable = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #252525;
+    border-radius: 8px;
+    overflow: hidden;
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        color: #ffffff;
+    }
+
+    th {
+        background-color: #33334d;
+    }
+
+    td {
+        background-color: #1e1e2f;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #2a2a3b;
+    }
+
+    tr:hover td {
+        background-color: #3a3a4d;
+    }
+`;
+
+const ModalFooter = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+`;
 
 export default ManageParkingSpacesModal;
