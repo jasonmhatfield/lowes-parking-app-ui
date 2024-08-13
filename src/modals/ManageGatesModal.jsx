@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
+import '../styles/ManageGatesModal.css';
+import '../styles/Modal.css';
+import '../styles/Button.css';
 
 const ManageGatesModal = ({ onClose }) => {
   const [gates, setGates] = useState([]);

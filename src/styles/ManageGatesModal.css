@@ -1,0 +1,55 @@
+/* Manage Gates Modal */
+.modal-header {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.modal-body {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.display-item {
+    background-color: #33334d;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    text-align: center;
+}
+
+.display-item span {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.modal-footer .close-button,
+.modal-footer .submit-button {
+    width: 45%;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #1976D2;
+    color: #ffffff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.modal-footer .close-button:hover,
+.modal-footer .submit-button:hover {
+    background-color: #005eb8;
+}

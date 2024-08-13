@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import EditUserModal from './EditUserModal';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
+import '../styles/ManageUsersModal.css';
+import '../styles/Modal.css';
+import '../styles/Button.css';
 
 const ManageUsersModal = ({ onClose }) => {
   const [users, setUsers] = useState([]);

@@ -3,6 +3,7 @@ import AccessibleIcon from '@mui/icons-material/Accessible';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
+import '../styles/AddUserModal.css';
 
 const AddUserModal = ({ onClose, onSave }) => {
   const [newUser, setNewUser] = useState({

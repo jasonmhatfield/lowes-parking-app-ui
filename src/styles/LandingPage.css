@@ -1,0 +1,72 @@
+/* Landing Page */
+.landing-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #004792;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.header .logo {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.header p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #dcdcdc;
+}
+
+.login-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.login-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.login-button {
+    background-color: #004792;
+    color: #ffffff;
+    border: none;
+    padding: 15px 30px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 18px;
+    width: 200px;
+    height: 50px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-button:hover {
+    background-color: #005eb8;
+    transform: translateY(-2px);
+}
+
+.login-button:active {
+    background-color: #003366;
+    transform: translateY(0);
+}

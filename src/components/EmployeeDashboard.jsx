@@ -9,6 +9,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import { Button, Modal, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
+import '../styles/EmployeeDashboard.css';
+import '../styles/Button.css';
+import '../styles/Modal.css';
 
 const EmployeeDashboard = () => {
   const [parkingSpots, setParkingSpots] = useState([]);

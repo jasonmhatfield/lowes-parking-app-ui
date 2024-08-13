@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LowesLogo from '../assets/lowes-logo.png';
+import '../styles/LandingPage.css';
 
 const LandingPage = () => {
   const [users, setUsers] = useState([]);
