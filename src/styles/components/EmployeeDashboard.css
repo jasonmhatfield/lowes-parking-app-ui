@@ -1,0 +1,236 @@
+.DashboardContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f4f4f9;
+    height: 100vh;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.Header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.Logo {
+    width: 150px;
+}
+
+.WelcomeMessage {
+    font-size: 2rem;
+    margin-top: 10px;
+    text-align: center;
+    color: #00509e;
+}
+
+.MainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: 100%;
+}
+
+.FloorSelectContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.FloorSelectLabel {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    color: #00509e;
+}
+
+.FloorSelect {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cccccc;
+    background-color: #ffffff;
+    color: #00509e;
+}
+
+.ParkingGarage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
+}
+
+.ParkingRow {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.ParkingRoad {
+    width: 100%;
+    height: 60px;
+    background-color: #2c3e50;
+    border-radius: 10px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.RoadLine {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #ffffff;
+    transform: translateY(-50%);
+}
+
+.ParkingButton {
+    position: relative;
+    width: 80px;
+    height: 100px;
+    background-color: #0072ce;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.ParkingButton.green {
+    background-color: #28a745;
+}
+
+.ParkingButton.grey {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.ParkingButton.blue {
+    background-color: #0072ce;
+}
+
+.ParkingButton:hover {
+    transform: translateY(-2px);
+}
+
+.ParkingButton:disabled {
+    cursor: not-allowed;
+}
+
+.ParkingButton span {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.ParkingButton svg {
+    font-size: 2rem;
+}
+
+.AvailableSpotsList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.AvailableSpotItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0072ce;
+    color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.AvailableSpotItem:hover {
+    background-color: #00509e;
+    transform: translateY(-2px);
+}
+
+.AvailableSpotItem svg {
+    font-size: 1.5rem;
+}
+
+.SpotNumber {
+    font-size: 1.2rem;
+}
+
+.NoSpotsMessage {
+    font-size: 1.2rem;
+    color: #dc3545;
+}
+
+.GateStatusContainer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+}
+
+.GateStatus {
+    display: flex;
+    align-items: center;
+    background-color: #f4f4f9;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    margin: 0 5px;
+}
+
+.GateIcon {
+    margin-right: 10px;
+    font-size: 2rem;
+}
+
+.GateIcon.gate-open {
+    color: #28a745;
+}
+
+.GateIcon.gate-closed {
+    color: #dc3545;
+}
+
+.GateName {
+    font-size: 1.2rem;
+    color: #00509e;
+}
+
+.LogoutButton {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-top: 20px;
+}
+
+.LogoutButton:hover {
+    background-color: #e04040;
+    transform: translateY(-2px);
+}

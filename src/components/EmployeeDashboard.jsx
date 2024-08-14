@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import EmployeeDashboardDesktop from './EmployeeDashboardDesktop';
-import EmployeeDashboardMobile from './EmployeeDashboardMobile';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import EmployeeParkingModal from '../modals/EmployeeParkingModal';
+import '../styles/components/EmployeeDashboard.css';
+import LowesLogo from '../assets/lowes-logo.png';
 
 const EmployeeDashboard = () => {
   const [parkingSpots, setParkingSpots] = useState([]);
@@ -143,41 +143,84 @@ const EmployeeDashboard = () => {
   const handleFloorChange = (event) => setSelectedFloor(event.target.value);
 
   return (
-    <>
-      {isMobile ? (
-        <EmployeeDashboardMobile
-          user={user}
+    <div className="DashboardContainer">
+      <header className="Header">
+        <img src={LowesLogo} alt="Lowe's Logo" className="Logo" />
+        {user && <h1 className="WelcomeMessage">Welcome, {user.firstName}</h1>}
+      </header>
+
+      <div className="MainContent">
+        <div className="FloorSelectContainer">
+          <label className="FloorSelectLabel">Select Floor</label>
+          <select value={selectedFloor} onChange={handleFloorChange} className="FloorSelect">
+            <option value="1">Floor 1</option>
+            <option value="2">Floor 2</option>
+            <option value="3">Floor 3</option>
+            <option value="4">Floor 4</option>
+          </select>
+        </div>
+
+        <div className="ParkingGarage">
+          <div className="ParkingRow">
+            {parkingSpots
+              .filter(spot => parseInt(spot.spotNumber) % 2 !== 0 && spot.spotNumber.startsWith(selectedFloor))
+              .sort((a, b) => parseInt(a.spotNumber) - parseInt(b.spotNumber))
+              .map(spot => (
+                <button
+                  key={spot.id}
+                  onClick={() => handleParking(spot)}
+                  className={`ParkingButton ${getButtonClass(spot)}`}
+                >
+                  {getIconForSpot(spot)}
+                  <span>{spot.spotNumber}</span>
+                </button>
+              ))}
+          </div>
+          <div className="ParkingRoad">
+            <div className="RoadLine" />
+          </div>
+          <div className="ParkingRow">
+            {parkingSpots
+              .filter(spot => parseInt(spot.spotNumber) % 2 === 0 && spot.spotNumber.startsWith(selectedFloor))
+              .sort((a, b) => parseInt(a.spotNumber) - parseInt(b.spotNumber))
+              .map(spot => (
+                <button
+                  key={spot.id}
+                  onClick={() => handleParking(spot)}
+                  className={`ParkingButton ${getButtonClass(spot)}`}
+                >
+                  {getIconForSpot(spot)}
+                  <span>{spot.spotNumber}</span>
+                </button>
+              ))}
+          </div>
+        </div>
+
+        <div className="GateStatusContainer">
+          {gates.map(gate => (
+            <div key={gate.id} className="GateStatus">
+              <div className={`GateIcon ${gate.operational ? 'gate-open' : 'gate-closed'}`}>
+                {gate.operational ? <DirectionsCarIcon /> : <DirectionsCarIcon />}
+              </div>
+              <span className="GateName">
+                {gate.gateName} {gate.operational ? '(Open)' : '(Closed)'}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={handleLogout} className="LogoutButton">Logout</button>
+      </div>
+
+      {parkingModalOpen && (
+        <EmployeeParkingModal
+          open={parkingModalOpen}
+          userParkingSpotId={userParkingSpotId}
           parkingSpots={parkingSpots}
-          selectedFloor={selectedFloor}
-          handleFloorChange={handleFloorChange}
           handleParking={handleParking}
-          getIconForSpot={getIconForSpot}
-          handleLogout={handleLogout}
-          data-testid="employee-dashboard-mobile"
-        />
-      ) : (
-        <EmployeeDashboardDesktop
-          user={user}
-          parkingSpots={parkingSpots}
-          gates={gates}
-          selectedFloor={selectedFloor}
-          handleFloorChange={handleFloorChange}
-          handleParking={handleParking}
-          getButtonClass={getButtonClass}
-          getIconForSpot={getIconForSpot}
-          handleLogout={handleLogout}
-          data-testid="employee-dashboard-desktop"
         />
       )}
-
-      <EmployeeParkingModal
-        open={parkingModalOpen}
-        userParkingSpotId={userParkingSpotId}
-        parkingSpots={parkingSpots}
-        handleParking={handleParking}
-        data-testid="employee-parking-modal"
-      />
-    </>
+    </div>
   );
 };
 
