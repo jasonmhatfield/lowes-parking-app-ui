@@ -8,10 +8,10 @@ const Modal = ({ open, onClose, children }) => {
   useEffect(() => {
     if (open) {
       setIsMounted(true);
-      setTimeout(() => setShouldAnimate(true), 10); // Slight delay to ensure animation triggers
+      setTimeout(() => setShouldAnimate(true), 10);
     } else {
       setShouldAnimate(false);
-      setTimeout(() => setIsMounted(false), 600); // Increase delay to match fade-out duration
+      setTimeout(() => setIsMounted(false), 600);
     }
   }, [open]);
 

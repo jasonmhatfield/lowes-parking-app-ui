@@ -94,9 +94,9 @@ const DashboardContainer = styled.div`
     //padding: 20px;
     background-color: #f4f4f9;
     height: 100vh;
-    max-width:1000px; /* Ensure it fits within screen width */
+    max-width:1000px;
     margin: 0 auto;
-    overflow: hidden; /* Prevent horizontal overflow */
+    overflow: hidden;
 `;
 
 const Header = styled.header`
@@ -206,7 +206,7 @@ const ParkingButton = styled.button`
 
     &.grey {
         background-color: #6c757d;
-        cursor: not-allowed; /* Disable click when the spot is occupied and not by the user */
+        cursor: not-allowed;
     }
 
     &.blue {

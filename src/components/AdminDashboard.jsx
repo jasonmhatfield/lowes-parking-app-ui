@@ -33,8 +33,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // const isModalOpen = showGatesModal || showParkingSpacesModal || showUsersModal || showAddUserModal;
-
   return (
     <Wrapper>
       <DashboardContainer>
@@ -72,10 +70,10 @@ const DashboardContainer = styled.div`
     border-radius: 12px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     color: #ffffff;
-    max-width: 400px; /* Ensure it fits well within screen width */
+    max-width: 400px;
     width: 100%;
-    max-height: 90vh; /* Prevent overflowing beyond screen height */
-    overflow-y: auto; /* Allow scrolling within the container if content is too tall */
+    max-height: 90vh;
+    overflow-y: auto;
 `;
 
 const Title = styled.h1`

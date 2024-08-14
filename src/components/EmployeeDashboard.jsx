@@ -17,7 +17,7 @@ const EmployeeDashboard = () => {
   const [userParkingSpotId, setUserParkingSpotId] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState('1');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [parkingModalOpen, setParkingModalOpen] = useState(false);  // State to control modal visibility
+  const [parkingModalOpen, setParkingModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
@@ -37,7 +37,7 @@ const EmployeeDashboard = () => {
         const userSpot = parkingSpotsData.find(spot => spot.userId === loggedInUser.id);
         if (userSpot) {
           setUserParkingSpotId(userSpot.id);
-          setParkingModalOpen(true);  // Open modal if the user has a parking spot
+          setParkingModalOpen(true);
         }
       }
     } catch (error) {
@@ -109,7 +109,7 @@ const EmployeeDashboard = () => {
         const updatedSpot = await response.json();
         setParkingSpots(prevSpots => prevSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
         setUserParkingSpotId(isLeaving ? null : spot.id);
-        setParkingModalOpen(!isLeaving);  // Toggle modal based on parking status
+        setParkingModalOpen(!isLeaving);
       } else {
         console.error('Failed to update parking spot.');
       }

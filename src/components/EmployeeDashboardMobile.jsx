@@ -48,10 +48,10 @@ const DashboardContainer = styled.div`
     background-color: #f4f4f9;
     height: 100vh;
     color: #00509e;
-    max-width: 95%; /* Adjusted to be wider */
+    max-width: 95%;
     margin: 0 auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adding some shadow to differentiate the container */
-    border-radius: 8px; /* Rounded corners for a more modern look */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 `;
 
 const Logo = styled.img`
