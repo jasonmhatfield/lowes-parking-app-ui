@@ -1,4 +1,3 @@
-// src/modals/AddUserModal.jsx
 import React, { useState } from 'react';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import EvStationIcon from '@mui/icons-material/EvStation';
@@ -86,13 +85,11 @@ const ModalHeader = styled.div`
 `;
 
 const ModalBody = styled.div`
-  display: flex;
   flex-direction: column;
   align-items: center;
 `;
 
 const FormGroup = styled.div`
-  width: 100%;
   margin-bottom: 15px;
 `;
 
@@ -103,7 +100,7 @@ const Label = styled.label`
 `;
 
 const Input = styled.input`
-  width: 100%;
+  width: 94%;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #555573;

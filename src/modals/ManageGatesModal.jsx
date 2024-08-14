@@ -1,4 +1,3 @@
-// src/modals/ManageGatesModal.jsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -7,7 +6,6 @@ import Modal from '../components/Modal';
 
 const ManageGatesModal = ({ onClose }) => {
   const [gates, setGates] = useState([]);
-  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     const fetchGates = async () => {
@@ -24,7 +22,6 @@ const ManageGatesModal = ({ onClose }) => {
   }, []);
 
   const handleGateToggle = async (id, currentStatus) => {
-    setUpdating(true);
     try {
       const response = await fetch(`http://localhost:8080/api/gates/${id}?isOperational=${!currentStatus}`, {
         method: 'PATCH',
@@ -38,8 +35,6 @@ const ManageGatesModal = ({ onClose }) => {
       }
     } catch (error) {
       console.error('Error updating gate status:', error);
-    } finally {
-      setUpdating(false);
     }
   };
 
@@ -76,6 +71,8 @@ const ModalContent = styled.div`
     width: 360px;
     height: 400px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
 `;
 
 const ModalHeader = styled.div`
@@ -88,7 +85,9 @@ const ModalHeader = styled.div`
 const ModalBody = styled.div`
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
+    flex: 1;
     max-height: calc(100% - 100px);
     overflow-y: auto;
 `;
@@ -103,7 +102,7 @@ const GateItem = styled.div`
     margin-bottom: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
-    width: 100%;
+    width: 60%;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 
     &:hover {
@@ -118,7 +117,7 @@ const GateName = styled.span`
 
 const GateIcon = styled.div`
     font-size: 1.5rem;
-    color: ${({ operational }) => (operational ? '#ffffff' : '#ffffff')};
+    color: #ffffff;
 `;
 
 const ModalFooter = styled.div`
