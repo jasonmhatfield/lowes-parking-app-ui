@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import EmployeeDashboardDesktop from '../../components/EmployeeDashboardDesktop';
+import EmployeeDashboardDesktop from '../EmployeeDashboardDesktop';
 import { useNavigate } from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({

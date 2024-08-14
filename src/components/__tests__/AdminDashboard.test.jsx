@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import AdminDashboard from '../../components/AdminDashboard';
+import AdminDashboard from '../AdminDashboard';
 
 test('renders AdminDashboard and handles modals visibility', async () => {
   render(

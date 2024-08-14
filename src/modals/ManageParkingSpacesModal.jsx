@@ -1,4 +1,3 @@
-// src/modals/ManageParkingSpacesModal.jsx
 import React, { useEffect, useState } from 'react';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
@@ -94,9 +93,9 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   });
 
   return (
-    <Modal open={true} onClose={onClose}>
+    <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
       <ModalContent>
-        <ModalHeader>Manage Parking Spaces</ModalHeader>
+        <ModalHeader id="modal-title">Manage Parking Spaces</ModalHeader>
         <ModalBody>
           <FilterButtons>
             <Button onClick={() => setFilter('all')} active={filter === 'all'}>All</Button>

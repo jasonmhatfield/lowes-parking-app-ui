@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Modal from '../../components/Modal'; // Adjust the path as necessary
+import Modal from '../Modal'; // Adjust the path as necessary
 
 describe('Modal Component', () => {
   it('renders the modal content when open', () => {

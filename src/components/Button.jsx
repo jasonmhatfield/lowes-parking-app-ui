@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
-const Button = ({ children, onClick, disabled, className = 'primary', testId }) => (
+const Button = ({ children, onClick, disabled = false, className = 'primary', dataTestId }) => (
   <StyledButton
     onClick={onClick}
     disabled={disabled}
     className={className}
-    data-testid={testId}
+    data-testid={dataTestId}
   >
     {children}
   </StyledButton>
@@ -83,5 +84,20 @@ const StyledButton = styled.button`
         transform: none;
     }
 `;
+
+Button.propTypes = {
+  children: PropTypes.node.isRequired,
+  onClick: PropTypes.func,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+  dataTestId: PropTypes.string
+};
+
+Button.defaultProps = {
+  onClick: () => {},
+  disabled: false,
+  className: 'primary',
+  dataTestId: ''
+};
 
 export default Button;

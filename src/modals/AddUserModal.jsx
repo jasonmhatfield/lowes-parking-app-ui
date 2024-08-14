@@ -83,8 +83,20 @@ const AddUserModal = ({ onClose, onSave }) => {
           </ToggleGroup>
         </ModalBody>
         <ModalFooter>
-          <Button data-testid="cancel-button" onClick={onClose}>Cancel</Button>
-          <Button data-testid="save-button" onClick={handleSave}>Save</Button>
+          <Button
+            dataTestId="cancel-button"
+            onClick={onClose}
+            className="cancel-button"
+          >
+            Cancel
+          </Button>
+          <Button
+            dataTestId="save-button"
+            onClick={handleSave}
+            className="save-button"
+          >
+            Save
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

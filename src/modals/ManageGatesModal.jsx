@@ -41,23 +41,24 @@ const ManageGatesModal = ({ onClose }) => {
   return (
     <Modal open={true} onClose={onClose}>
       <ModalContent>
-        <ModalHeader>Manage Gates</ModalHeader>
+        <ModalHeader data-testid="modal-header">Manage Gates</ModalHeader>
         <ModalBody>
           {gates.map(gate => (
             <GateItem
               key={gate.id}
               operational={gate.operational}
               onClick={() => handleGateToggle(gate.id, gate.operational)}
+              data-testid={`gate-item-${gate.id}`}
             >
-              <GateName>{gate.gateName}</GateName>
-              <GateIcon operational={gate.operational}>
+              <GateName data-testid={`gate-name-${gate.id}`}>{gate.gateName}</GateName>
+              <GateIcon operational={gate.operational} data-testid={`gate-icon-${gate.id}`}>
                 {gate.operational ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />}
               </GateIcon>
             </GateItem>
           ))}
         </ModalBody>
         <ModalFooter>
-          <CloseButton onClick={onClose}>Close</CloseButton>
+          <CloseButton onClick={onClose} data-testid="close-button">Close</CloseButton>
         </ModalFooter>
       </ModalContent>
     </Modal>

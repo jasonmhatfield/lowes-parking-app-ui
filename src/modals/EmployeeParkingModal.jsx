@@ -35,14 +35,15 @@ const EmployeeParkingModal = ({
         <ModalHeader>
           <CarIcon />
           <div>
-            <FloorDisplay>Floor {spotInfo.floor}</FloorDisplay>
-            <SpotDisplay>Spot {spotInfo.spotNumber}</SpotDisplay>
+            <FloorDisplay data-testid="floor-display">Floor {spotInfo.floor}</FloorDisplay>
+            <SpotDisplay data-testid="spot-display">Spot {spotInfo.spotNumber}</SpotDisplay>
           </div>
         </ModalHeader>
         <LeaveButton
           variant="contained"
           className="parking-button green"
           onClick={() => handleParking(parkingSpots.find(spot => spot.id === userParkingSpotId))}
+          data-testid="leave-button"
         >
           Leave Spot
         </LeaveButton>
