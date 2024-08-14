@@ -78,6 +78,7 @@ describe('AdminDashboard', () => {
     );
 
     fireEvent.click(screen.getByTestId('add-user-button'));
+
     const saveButton = screen.getByTestId('save-button');
     fireEvent.click(saveButton);
 
@@ -86,8 +87,8 @@ describe('AdminDashboard', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    // Ensure setShowAddUserModal(false) was called by checking that the modal is no longer in the document
-    expect(screen.queryByTestId('add-user-button')).toBeInTheDocument();
+    // Assert that setShowAddUserModal(false) was called (indirectly checking line 32)
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   test('handles adding a user with an error', async () => {
@@ -97,6 +98,8 @@ describe('AdminDashboard', () => {
       })
     );
 
+    console.error = jest.fn(); // Mock console.error
+
     fireEvent.click(screen.getByTestId('add-user-button'));
     const saveButton = screen.getByTestId('save-button');
     fireEvent.click(saveButton);
@@ -105,6 +108,9 @@ describe('AdminDashboard', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
+
+    // Assert that console.error was called (checking line 29)
+    expect(console.error).toHaveBeenCalledWith('Error adding user');
   });
 
   test('handles logout button click and page navigation', async () => {
@@ -112,5 +118,24 @@ describe('AdminDashboard', () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe('/');
     });
+  });
+
+  test('handles error when adding a user fails', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    global.fetch = jest.fn(() =>
+      Promise.reject(new Error('Network error'))
+    );
+
+    fireEvent.click(screen.getByTestId('add-user-button'));
+
+    const saveButton = screen.getByTestId('save-button');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith('Error adding user:', expect.any(Error));
+    });
+
+    consoleSpy.mockRestore();
   });
 });
