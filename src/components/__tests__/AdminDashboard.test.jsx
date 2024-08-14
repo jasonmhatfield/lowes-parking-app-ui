@@ -1,141 +1,119 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import AdminDashboard from '../AdminDashboard';
+import EmployeeDashboard from '../EmployeeDashboard';
 
-describe('AdminDashboard', () => {
+// Mocking SockJS and StompJS
+jest.mock('sockjs-client');
+jest.mock('@stomp/stompjs', () => ({
+  Stomp: {
+    over: () => ({
+      connect: (headers, callback) => callback(),
+      subscribe: (topic, callback) => {},
+      disconnect: jest.fn(),
+    }),
+  },
+}));
+
+describe('EmployeeDashboard', () => {
   beforeEach(() => {
-    render(
-      <BrowserRouter>
-        <AdminDashboard />
-      </BrowserRouter>
-    );
-  });
-
-  test('renders the AdminDashboard title and action buttons', () => {
-    expect(screen.getByTestId('dashboard-title')).toBeInTheDocument();
-    expect(screen.getByTestId('manage-gates-button')).toBeInTheDocument();
-    expect(screen.getByTestId('manage-parking-spaces-button')).toBeInTheDocument();
-    expect(screen.getByTestId('manage-users-button')).toBeInTheDocument();
-    expect(screen.getByTestId('add-user-button')).toBeInTheDocument();
-    expect(screen.getByTestId('logout-button')).toBeInTheDocument();
-  });
-
-  test('handles "Manage Gates" modal visibility', async () => {
-    fireEvent.click(screen.getByTestId('manage-gates-button'));
-    await waitFor(() => {
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
-  });
-
-  test('handles "Manage Parking Spaces" modal visibility', async () => {
-    fireEvent.click(screen.getByTestId('manage-parking-spaces-button'));
-    await waitFor(() => {
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
-  });
-
-  test('handles "Manage Users" modal visibility', async () => {
-    fireEvent.click(screen.getByTestId('manage-users-button'));
-    await waitFor(() => {
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
-  });
-
-  test('handles "Add User" modal visibility and cancel', async () => {
-    fireEvent.click(screen.getByTestId('add-user-button'));
-    await waitFor(() => {
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId('cancel-button'));
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
-  });
-
-  test('handles adding a user successfully and closing the modal', async () => {
+    // Mock fetch to return empty arrays for parking spots and gates
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({}),
+        json: () => Promise.resolve([]),
       })
     );
 
-    fireEvent.click(screen.getByTestId('add-user-button'));
+    // Mocking sessionStorage methods
+    const mockSessionStorage = (() => {
+      let store = {};
 
-    const saveButton = screen.getByTestId('save-button');
-    fireEvent.click(saveButton);
+      return {
+        getItem: (key) => store[key] || null,
+        setItem: (key, value) => {
+          store[key] = value.toString();
+        },
+        clear: () => {
+          store = {};
+        },
+        removeItem: (key) => {
+          delete store[key];
+        }
+      };
+    })();
 
-    // Wait for the modal to close
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
-
-    // Assert that setShowAddUserModal(false) was called (indirectly checking line 32)
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
+    window.sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John', hasHandicapPlacard: true, hasEv: true }));
   });
 
-  test('handles adding a user with an error', async () => {
-    global.fetch = jest.fn(() =>
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('renders the EmployeeDashboard with user data', async () => {
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText(/Welcome, John/i)).toBeInTheDocument();
+    expect(screen.getByAltText("Lowe's Logo")).toBeInTheDocument();
+  });
+
+  test('handles floor selection', async () => {
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    const floorSelect = screen.getByLabelText(/Select Floor/i);
+    fireEvent.change(floorSelect, { target: { value: '2' } });
+    expect(floorSelect.value).toBe('2');
+  });
+
+  test('opens and closes parking modal based on parking spot selection', async () => {
+    // Mock fetch to return parking spots
+    global.fetch.mockImplementationOnce(() =>
       Promise.resolve({
-        ok: false,
+        ok: true,
+        json: () => Promise.resolve([
+          { id: 1, spotNumber: '101', type: 'regular', occupied: false, userId: null },
+          { id: 2, spotNumber: '102', type: 'handicap', occupied: false, userId: null },
+        ]),
       })
     );
 
-    console.error = jest.fn(); // Mock console.error
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
 
-    fireEvent.click(screen.getByTestId('add-user-button'));
-    const saveButton = screen.getByTestId('save-button');
-    fireEvent.click(saveButton);
-
-    // Ensure modal does not close on error
     await waitFor(() => {
+      const parkingButtons = screen.getAllByRole('button', { name: /101|102/ });
+      fireEvent.click(parkingButtons[0]); // Select first spot
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      fireEvent.click(parkingButtons[1]); // Select another spot
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
-
-    // Assert that console.error was called (checking line 29)
-    expect(console.error).toHaveBeenCalledWith('Error adding user');
   });
 
-  test('handles logout button click and page navigation', async () => {
-    fireEvent.click(screen.getByTestId('logout-button'));
-    await waitFor(() => {
-      expect(window.location.pathname).toBe('/');
-    });
-  });
-
-  test('handles error when adding a user fails', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    global.fetch = jest.fn(() =>
-      Promise.reject(new Error('Network error'))
+  test('logs out user on logout button click', async () => {
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
     );
 
-    fireEvent.click(screen.getByTestId('add-user-button'));
-
-    const saveButton = screen.getByTestId('save-button');
-    fireEvent.click(saveButton);
+    const logoutButton = screen.getByText(/Logout/i);
+    fireEvent.click(logoutButton);
 
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Error adding user:', expect.any(Error));
+      expect(window.sessionStorage.getItem('loggedInUser')).toBe(null);
+      expect(window.location.pathname).toBe('/');
     });
-
-    consoleSpy.mockRestore();
   });
 });

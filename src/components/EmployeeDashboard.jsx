@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import {Stomp} from '@stomp/stompjs';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
@@ -16,7 +16,6 @@ const EmployeeDashboard = () => {
   const [user, setUser] = useState(null);
   const [userParkingSpotId, setUserParkingSpotId] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState('1');
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [parkingModalOpen, setParkingModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +23,7 @@ const EmployeeDashboard = () => {
     try {
       const [parkingSpotsResponse, gatesResponse] = await Promise.all([
         fetch('http://localhost:8080/api/parkingSpots'),
-        fetch('http://localhost:8080/api/gates')
+        fetch('http://localhost:8080/api/gates'),
       ]);
       const parkingSpotsData = await parkingSpotsResponse.json();
       const gatesData = await gatesResponse.json();
@@ -52,7 +51,9 @@ const EmployeeDashboard = () => {
       return;
     }
     setUser(loggedInUser);
-    fetchData();
+
+    // Fetch data and handle potential errors
+    fetchData().catch(error => console.error("Error during initial data fetch:", error));
 
     const socket = new SockJS('http://localhost:8080/ws');
     const stompClient = Stomp.over(socket);
@@ -60,15 +61,17 @@ const EmployeeDashboard = () => {
     stompClient.connect({}, () => {
       stompClient.subscribe('/topic/gates', (message) => {
         const updatedGate = JSON.parse(message.body);
-        setGates(prevGates => prevGates.map(gate => gate.id === updatedGate.id ? updatedGate : gate));
+        setGates(prevGates =>
+          prevGates.map(gate => (gate.id === updatedGate.id ? updatedGate : gate))
+        );
       });
 
       stompClient.subscribe('/topic/parkingSpots', (message) => {
         const updatedSpot = JSON.parse(message.body);
         setParkingSpots(prevSpots =>
-          prevSpots.map(spot => spot.id === updatedSpot.id ? updatedSpot : spot)
+          prevSpots.map(spot => (spot.id === updatedSpot.id ? updatedSpot : spot))
         );
-        if (updatedSpot.userId !== user.id && userParkingSpotId === updatedSpot.id) {
+        if (updatedSpot.userId !== user?.id && userParkingSpotId === updatedSpot.id) {
           setUserParkingSpotId(null);
           setParkingModalOpen(false);
         }
@@ -78,16 +81,7 @@ const EmployeeDashboard = () => {
     return () => {
       stompClient.disconnect();
     };
-  }, [fetchData, navigate, userParkingSpotId]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [fetchData, navigate, userParkingSpotId, user?.id]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('loggedInUser');
@@ -107,7 +101,9 @@ const EmployeeDashboard = () => {
 
       if (response.ok) {
         const updatedSpot = await response.json();
-        setParkingSpots(prevSpots => prevSpots.map(s => s.id === updatedSpot.id ? updatedSpot : s));
+        setParkingSpots(prevSpots =>
+          prevSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s))
+        );
         setUserParkingSpotId(isLeaving ? null : spot.id);
         setParkingModalOpen(!isLeaving);
       } else {
@@ -121,9 +117,12 @@ const EmployeeDashboard = () => {
   const getIconForSpot = (spot) => {
     if (spot.occupied) return <DirectionsCarIcon />;
     switch (spot.type) {
-      case 'ev': return <EvStationIcon />;
-      case 'handicap': return <AccessibleIcon />;
-      default: return <LocalParkingIcon />;
+      case 'ev':
+        return <EvStationIcon/>;
+      case 'handicap':
+        return <AccessibleIcon/>;
+      default:
+        return <LocalParkingIcon/>;
     }
   };
 
@@ -149,45 +148,59 @@ const EmployeeDashboard = () => {
         {user && <h1 className="WelcomeMessage">Welcome, {user.firstName}</h1>}
       </header>
 
-      <div className="MainContent">
-        <div className="FloorSelectContainer">
-          <label className="FloorSelectLabel">Select Floor</label>
-          <select value={selectedFloor} onChange={handleFloorChange} className="FloorSelect">
-            <option value="1">Floor 1</option>
-            <option value="2">Floor 2</option>
-            <option value="3">Floor 3</option>
-            <option value="4">Floor 4</option>
+      <div className = "MainContent">
+        <div className = "FloorSelectContainer">
+          <label className = "FloorSelectLabel" htmlFor = "floorSelect">Select Floor</label>
+          <select
+            id = "floorSelect"
+            value = {selectedFloor}
+            onChange = {handleFloorChange}
+            className = "FloorSelect"
+          >
+            <option value = "1">Floor 1</option>
+            <option value = "2">Floor 2</option>
+            <option value = "3">Floor 3</option>
+            <option value = "4">Floor 4</option>
           </select>
         </div>
 
-        <div className="ParkingGarage">
-          <div className="ParkingRow">
+        <div className = "ParkingGarage">
+          <div className = "ParkingRow">
             {parkingSpots
-              .filter(spot => parseInt(spot.spotNumber) % 2 !== 0 && spot.spotNumber.startsWith(selectedFloor))
+              .filter(
+                (spot) =>
+                  parseInt(spot.spotNumber) % 2 !== 0 &&
+                  spot.spotNumber.startsWith(selectedFloor)
+              )
               .sort((a, b) => parseInt(a.spotNumber) - parseInt(b.spotNumber))
-              .map(spot => (
+              .map((spot) => (
                 <button
-                  key={spot.id}
-                  onClick={() => handleParking(spot)}
-                  className={`ParkingButton ${getButtonClass(spot)}`}
+                  key = {spot.id}
+                  onClick = {() => handleParking(spot)}
+                  className = {`ParkingButton ${getButtonClass(spot)}`}
+                  aria-label = {`Parking spot ${spot.spotNumber}`} // Adding aria-label
                 >
                   {getIconForSpot(spot)}
                   <span>{spot.spotNumber}</span>
                 </button>
               ))}
           </div>
-          <div className="ParkingRoad">
-            <div className="RoadLine" />
+          <div className = "ParkingRoad">
+            <div className = "RoadLine"/>
           </div>
-          <div className="ParkingRow">
+          <div className = "ParkingRow">
             {parkingSpots
-              .filter(spot => parseInt(spot.spotNumber) % 2 === 0 && spot.spotNumber.startsWith(selectedFloor))
+              .filter(
+                (spot) =>
+                  parseInt(spot.spotNumber) % 2 === 0 &&
+                  spot.spotNumber.startsWith(selectedFloor)
+              )
               .sort((a, b) => parseInt(a.spotNumber) - parseInt(b.spotNumber))
-              .map(spot => (
+              .map((spot) => (
                 <button
-                  key={spot.id}
-                  onClick={() => handleParking(spot)}
-                  className={`ParkingButton ${getButtonClass(spot)}`}
+                  key = {spot.id}
+                  onClick = {() => handleParking(spot)}
+                  className = {`ParkingButton ${getButtonClass(spot)}`}
                 >
                   {getIconForSpot(spot)}
                   <span>{spot.spotNumber}</span>
@@ -196,28 +209,30 @@ const EmployeeDashboard = () => {
           </div>
         </div>
 
-        <div className="GateStatusContainer">
-          {gates.map(gate => (
-            <div key={gate.id} className="GateStatus">
-              <div className={`GateIcon ${gate.operational ? 'gate-open' : 'gate-closed'}`}>
-                {gate.operational ? <DirectionsCarIcon /> : <DirectionsCarIcon />}
+        <div className = "GateStatusContainer">
+          {gates.map((gate) => (
+            <div key = {gate.id} data-testid = {`gate-${gate.id}`} className = "GateStatus">
+              <div className = {`GateIcon ${gate.operational ? 'gate-open' : 'gate-closed'}`}>
+                {gate.operational ? <DirectionsCarIcon/> : <DirectionsCarIcon/>}
               </div>
-              <span className="GateName">
+              <span className = "GateName">
                 {gate.gateName} {gate.operational ? '(Open)' : '(Closed)'}
               </span>
             </div>
           ))}
         </div>
 
-        <button onClick={handleLogout} className="LogoutButton">Logout</button>
+        <button onClick = {handleLogout} className = "LogoutButton">
+          Logout
+        </button>
       </div>
 
       {parkingModalOpen && (
         <EmployeeParkingModal
-          open={parkingModalOpen}
-          userParkingSpotId={userParkingSpotId}
-          parkingSpots={parkingSpots}
-          handleParking={handleParking}
+          open = {parkingModalOpen}
+          userParkingSpotId = {userParkingSpotId}
+          parkingSpots = {parkingSpots}
+          handleParking = {handleParking}
         />
       )}
     </div>

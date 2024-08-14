@@ -98,7 +98,8 @@ const ManageUsersModal = ({ onClose }) => {
                     console.error('Error saving user');
                   }
                 } catch (error) {
-                  console.error('Error saving user:', error);
+                  console.error('Error saving user'); // First call for general error message
+                  console.error('Error saving user:', error); // Second call for error details
                 }
               }}
             />

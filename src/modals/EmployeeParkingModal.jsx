@@ -10,12 +10,19 @@ const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handlePar
     <ModalContainer>
       <ModalContent>
         <ModalTitle>Parking Spot Details</ModalTitle>
-        {userSpot ? (
-          <p>You are currently parked in spot {userSpot.spotNumber}.</p>
-        ) : (
-          <p>You do not have a reserved parking spot.</p>
+        <p data-testid="spot-display">
+          {userSpot
+            ? `You are currently parked in spot ${userSpot.number}.`
+            : 'You do not have a reserved parking spot.'}
+        </p>
+        {userSpot && (
+          <ModalButton
+            data-testid="leave-button"
+            onClick={() => handleParking(userSpot)}
+          >
+            Leave Spot
+          </ModalButton>
         )}
-        <ModalButton onClick={() => handleParking(userSpot)}>Leave Spot</ModalButton>
       </ModalContent>
     </ModalContainer>
   );

@@ -14,6 +14,7 @@ describe('EditUserModal', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     render(<EditUserModal user={mockUser} onClose={mockOnClose} onSave={mockOnSave} />);
   });
 
@@ -75,4 +76,19 @@ describe('EditUserModal', () => {
     fireEvent.click(screen.getByTestId('cancel-button'));
     expect(mockOnClose).toHaveBeenCalled();
   });
+
+  test('handles save error correctly', async () => {
+    console.error = jest.fn(); // Mock console.error
+    const errorMessage = 'Failed to save user';
+    mockOnSave.mockRejectedValueOnce(new Error(errorMessage));
+
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith('Error saving user:', new Error(errorMessage));
+      expect(screen.getByTestId('save-button')).not.toBeDisabled();
+      expect(screen.getByTestId('cancel-button')).not.toBeDisabled();
+    });
+  });
 });
+

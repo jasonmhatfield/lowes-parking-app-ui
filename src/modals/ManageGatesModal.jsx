@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
@@ -11,8 +11,12 @@ const ManageGatesModal = ({ onClose }) => {
     const fetchGates = async () => {
       try {
         const response = await fetch('http://localhost:8080/api/gates');
-        const data = await response.json();
-        setGates(data);
+        if (response.ok) {
+          const data = await response.json();
+          setGates(data);
+        } else {
+          throw new Error('Failed to fetch gates');
+        }
       } catch (error) {
         console.error('Error fetching gates:', error);
       }
@@ -29,7 +33,11 @@ const ManageGatesModal = ({ onClose }) => {
       });
 
       if (response.ok) {
-        setGates(gates.map(gate => gate.id === id ? { ...gate, operational: !currentStatus } : gate));
+        setGates((prevGates) =>
+          prevGates.map((gate) =>
+            gate.id === id ? { ...gate, operational: !currentStatus } : gate
+          )
+        );
       } else {
         console.error('Error updating gate status');
       }
@@ -43,7 +51,7 @@ const ManageGatesModal = ({ onClose }) => {
       <ModalContent>
         <ModalHeader data-testid="modal-header">Manage Gates</ModalHeader>
         <ModalBody>
-          {gates.map(gate => (
+          {gates.map((gate) => (
             <GateItem
               key={gate.id}
               operational={gate.operational}

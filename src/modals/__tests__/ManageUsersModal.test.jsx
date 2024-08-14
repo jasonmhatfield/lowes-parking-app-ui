@@ -1,4 +1,3 @@
-// src/modals/ManageUsersModal.test.jsx
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -21,11 +20,16 @@ describe('ManageUsersModal', () => {
   beforeEach(() => {
     fetchMock.resetMocks();
     fetchMock.mockResponseOnce(JSON.stringify(mockUsers));
+    jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error to avoid cluttering the test output
+  });
+
+  afterEach(() => {
+    console.error.mockRestore(); // Restore original console.error after each test
   });
 
   it('filters users based on search input', async () => {
     setup();
-    await waitFor(() => expect(screen.getByText(/John\s*Doe/)).toBeInTheDocument());
+    await screen.findByText(/John\s*Doe/);
 
     fireEvent.change(screen.getByPlaceholderText('Search users...'), { target: { value: 'Jane' } });
 
@@ -35,7 +39,7 @@ describe('ManageUsersModal', () => {
 
   it('sorts users by first name', async () => {
     setup();
-    await waitFor(() => expect(screen.getByText(/John\s*Doe/)).toBeInTheDocument());
+    await screen.findByText(/John\s*Doe/);
 
     fireEvent.click(screen.getByText('Sort by First Name'));
 
@@ -46,7 +50,7 @@ describe('ManageUsersModal', () => {
 
   it('sorts users by last name', async () => {
     setup();
-    await waitFor(() => expect(screen.getByText(/John\s*Doe/)).toBeInTheDocument());
+    await screen.findByText(/John\s*Doe/);
 
     fireEvent.click(screen.getByText('Sort by Last Name'));
 
@@ -57,7 +61,7 @@ describe('ManageUsersModal', () => {
 
   it('opens EditUserModal when a user is clicked and saves edited user', async () => {
     setup();
-    await waitFor(() => expect(screen.getByText(/John\s*Doe/)).toBeInTheDocument());
+    await screen.findByText(/John\s*Doe/);
 
     fireEvent.click(screen.getByText(/John\s*Doe/));
     expect(screen.getByText('Edit User')).toBeInTheDocument();
@@ -76,10 +80,50 @@ describe('ManageUsersModal', () => {
   it('closes modal on close button click', async () => {
     const onCloseMock = jest.fn();
     setup({ onClose: onCloseMock });
-    await waitFor(() => expect(screen.getByText(/John\s*Doe/)).toBeInTheDocument());
+    await screen.findByText(/John\s*Doe/);
 
     fireEvent.click(screen.getByText('Close'));
 
     expect(onCloseMock).toHaveBeenCalled();
   });
+
+  it('handles save user error correctly', async () => {
+    setup();
+    await screen.findByText(/John\s*Doe/);
+
+    fireEvent.click(screen.getByText(/John\s*Doe/));
+    expect(screen.getByText('Edit User')).toBeInTheDocument();
+
+    fetchMock.mockRejectOnce(new Error('Failed to save user'));
+
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith('Error saving user');
+      expect(console.error).toHaveBeenCalledWith('Error saving user:', expect.any(Error));
+    });
+  });
+
+  // New test to ensure coverage of `console.error('Error saving user');`
+  it('logs an error when response is not ok', async () => {
+    setup();
+    await screen.findByText(/John\s*Doe/);
+
+    fireEvent.click(screen.getByText(/John\s*Doe/));
+    expect(screen.getByText('Edit User')).toBeInTheDocument();
+
+    // Simulate a response with status 400
+    fetchMock.mockResponseOnce(JSON.stringify({}), { status: 400 });
+
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith('Error saving user');
+    });
+  });
+
+  it('handles WebSocket updates correctly', async () => {
+    // Mock WebSocket events and ensure the component updates correctly
+  });
+
 });

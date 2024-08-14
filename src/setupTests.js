@@ -1,6 +1,6 @@
-const { TextEncoder, TextDecoder } = require('util');
 import '@testing-library/jest-dom';
 import fetchMock from 'jest-fetch-mock';
+const { TextEncoder, TextDecoder } = require('util');
 
 // Polyfill TextEncoder and TextDecoder
 global.TextEncoder = TextEncoder;
