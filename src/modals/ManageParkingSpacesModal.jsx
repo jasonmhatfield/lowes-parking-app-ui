@@ -120,15 +120,15 @@ const ManageParkingSpacesModal = ({ onClose }) => {
                   <td>{spot.spotNumber}</td>
                   <td>{getIconForSpot(spot)}</td>
                   <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
-                  <td>{spot.userId ? userMap[spot.userId] : ''}</td>
-                  <td>
+                  <td className="fixed-width">{spot.userId ? userMap[spot.userId] : ''}</td>
+                  <td className="fixed-width">
                     {spot.occupied && (
-                      <Button
+                      <SmallButton
                         onClick={() => handleRemoveUserFromSpot(spot.id)}
                         disabled={updating}
                       >
                         Remove
-                      </Button>
+                      </SmallButton>
                     )}
                   </td>
                 </tr>
@@ -150,8 +150,8 @@ const ModalContent = styled.div`
     padding: 20px;
     border-radius: 12px;
     width: 700px;
-    max-height: 90vh; /* Limit the height of the modal */
-    overflow: hidden; /* Prevent overflow */
+    max-height: 80vh;
+    overflow: hidden;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
@@ -168,7 +168,9 @@ const ModalBody = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-y: auto;
+    width: 100%;
+    height: 60vh;
 `;
 
 const FilterButtons = styled.div`
@@ -203,6 +205,7 @@ const ParkingTable = styled.table`
         padding: 10px;
         text-align: center;
         color: #ffffff;
+        white-space: nowrap;
     }
 
     th {
@@ -226,6 +229,13 @@ const ModalFooter = styled.div`
     display: flex;
     justify-content: center;
     margin-top: 20px;
+`;
+
+const SmallButton = styled(Button)`
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    min-width: unset;
+    background-color: #f44336;
 `;
 
 export default ManageParkingSpacesModal;

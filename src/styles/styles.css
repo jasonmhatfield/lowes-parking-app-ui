@@ -1,3 +1,5 @@
+/* src/styles/styles.css */
+
 /* Global Styles */
 body {
     font-family: 'Roboto', sans-serif;
@@ -6,8 +8,8 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    overflow: hidden; /* Prevents any scrollbar from appearing */
     box-sizing: border-box;
-    /* Removed display: flex; to avoid layout issues */
 }
 
 .container {
@@ -20,26 +22,66 @@ body {
     max-height: 100vh;
     margin: 0 auto;
     box-sizing: border-box;
+    overflow: hidden; /* Ensures no scrollbar during content transitions */
 }
 
+/* Transition and animation settings */
 .fade-enter {
     opacity: 0;
-    transform: translateY(20px);
+    overflow: hidden; /* Ensures no scrollbar during fade-in */
 }
 
 .fade-enter-active {
     opacity: 1;
-    transform: translateY(0);
-    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+    transition: opacity 300ms ease-in-out;
+    overflow: hidden; /* Ensures no scrollbar during fade-in */
 }
 
 .fade-exit {
     opacity: 1;
-    transform: translateY(0);
+    overflow: hidden; /* Ensures no scrollbar during fade-out */
 }
 
 .fade-exit-active {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+    transition: opacity 300ms ease-in-out;
+    overflow: hidden; /* Ensures no scrollbar during fade-out */
 }
+
+/* Modern and Elegant Dark Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 8px; /* Set the width of the scrollbar */
+    height: 8px; /* Set the height for horizontal scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #444; /* Darker scrollbar thumb color */
+    border-radius: 10px; /* Roundness of the scrollbar thumb */
+    border: 2px solid #2e2e3e; /* Space around the thumb, matching the background color */
+    background-clip: padding-box; /* Ensure the border doesn't overlap the thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #666; /* Slightly lighter on hover */
+}
+
+::-webkit-scrollbar-track {
+    background-color: #1a1a2e; /* Very dark background for the scrollbar track */
+    border-radius: 10px; /* Roundness of the scrollbar track */
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent; /* Corner between horizontal and vertical scrollbar */
+}
+
+/* Hide the scrollbar arrows */
+::-webkit-scrollbar-button {
+    display: none;
+}
+
+/* Firefox scrollbar customization */
+* {
+    scrollbar-width: thin; /* Thin scrollbar */
+    scrollbar-color: #444 #1a1a2e; /* Dark thumb and darker track */
+}
+

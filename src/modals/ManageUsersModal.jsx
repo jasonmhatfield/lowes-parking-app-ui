@@ -1,4 +1,3 @@
-// src/modals/ManageUsersModal.jsx
 import React, { useState, useEffect } from 'react';
 import EditUserModal from './EditUserModal';
 import Modal from '../components/Modal';
@@ -153,7 +152,7 @@ const SortButtons = styled.div`
 `;
 
 const ScrollableList = styled.div`
-  max-height: 300px;
+  height: 300px;
   width: 100%;
   overflow-y: auto;
   margin-bottom: 15px;
