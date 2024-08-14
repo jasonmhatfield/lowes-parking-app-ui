@@ -79,7 +79,7 @@ const PageContainer = styled.div`
     align-items: center;
     padding: 10px;
     background-color: #f4f4f9;
-    height: 97vh;
+    height: 100vh;
     max-width: 1000px;
     margin: 0 auto;
     overflow: hidden;
