@@ -36,14 +36,14 @@ const AdminDashboard = () => {
   return (
     <Wrapper>
       <DashboardContainer>
-        <Title>Admin Dashboard</Title>
+        <Title data-testid="dashboard-title">Admin Dashboard</Title>
 
         <DashboardActions>
-          <ActionButton onClick={() => setShowGatesModal(true)}>Manage Gates</ActionButton>
-          <ActionButton onClick={() => setShowParkingSpacesModal(true)}>Manage Parking Spaces</ActionButton>
-          <ActionButton onClick={() => setShowUsersModal(true)}>Manage Users</ActionButton>
-          <ActionButton onClick={() => setShowAddUserModal(true)}>Add User</ActionButton>
-          <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+          <ActionButton data-testid="manage-gates-button" onClick={() => setShowGatesModal(true)}>Manage Gates</ActionButton>
+          <ActionButton data-testid="manage-parking-spaces-button" onClick={() => setShowParkingSpacesModal(true)}>Manage Parking Spaces</ActionButton>
+          <ActionButton data-testid="manage-users-button" onClick={() => setShowUsersModal(true)}>Manage Users</ActionButton>
+          <ActionButton data-testid="add-user-button" onClick={() => setShowAddUserModal(true)}>Add User</ActionButton>
+          <LogoutButton data-testid="logout-button" onClick={handleLogout}>Logout</LogoutButton>
         </DashboardActions>
 
         {showGatesModal && <ManageGatesModal onClose={() => setShowGatesModal(false)} />}
@@ -61,7 +61,7 @@ const Wrapper = styled.div`
     align-items: center;
     min-height: 100vh;
     background-color: #1a1a2e;
-    overflow: auto; /* Allow scrolling if needed */
+    overflow: auto;
 `;
 
 const DashboardContainer = styled.div`

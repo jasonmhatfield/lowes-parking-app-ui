@@ -8,13 +8,13 @@ const EmployeeDashboardMobile = ({ user, parkingSpots, selectedFloor, handleFloo
   );
 
   return (
-    <DashboardContainer>
-      <Logo src={LowesLogo} alt="Lowe's Logo" />
-      {user && <WelcomeMessage>Welcome, {user.firstName}</WelcomeMessage>}
+    <DashboardContainer data-testid="employee-dashboard-mobile">
+      <Logo src={LowesLogo} alt="Lowe's Logo" data-testid="lowes-logo-mobile" />
+      {user && <WelcomeMessage data-testid="welcome-message-mobile">Welcome, {user.firstName}</WelcomeMessage>}
 
       <FloorSelectContainer>
         <FloorSelectLabel>Select Floor</FloorSelectLabel>
-        <FloorSelect value={selectedFloor} onChange={handleFloorChange}>
+        <FloorSelect value={selectedFloor} onChange={handleFloorChange} data-testid="floor-select-mobile">
           <option value="1">Floor 1</option>
           <option value="2">Floor 2</option>
           <option value="3">Floor 3</option>
@@ -25,17 +25,17 @@ const EmployeeDashboardMobile = ({ user, parkingSpots, selectedFloor, handleFloo
       <AvailableSpotsList>
         {availableSpots.length > 0 ? (
           availableSpots.map(spot => (
-            <AvailableSpotItem key={spot.id} onClick={() => handleParking(spot)}>
+            <AvailableSpotItem key={spot.id} onClick={() => handleParking(spot)} data-testid={`parking-spot-${spot.spotNumber}`}>
               {getIconForSpot(spot)}
               <SpotNumber>{spot.spotNumber}</SpotNumber>
             </AvailableSpotItem>
           ))
         ) : (
-          <NoSpotsMessage>No available spots on this floor.</NoSpotsMessage>
+          <NoSpotsMessage data-testid="no-spots-message">No available spots on this floor.</NoSpotsMessage>
         )}
       </AvailableSpotsList>
 
-      <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+      <LogoutButton onClick={handleLogout} data-testid="logout-button-mobile">Logout</LogoutButton>
     </DashboardContainer>
   );
 };

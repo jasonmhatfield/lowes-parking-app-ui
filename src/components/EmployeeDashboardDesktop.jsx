@@ -7,28 +7,21 @@ import LockIcon from '@mui/icons-material/Lock';
 const EmployeeDashboardDesktop = ({ user, parkingSpots, gates, selectedFloor, handleFloorChange, handleParking, getButtonClass, getIconForSpot, handleLogout }) => {
   const userParkingSpotId = user?.parkingSpotId;
 
-  const canParkInSpot = (spot) => {
-    if (spot.occupied && spot.id !== userParkingSpotId) return false;
-    if (spot.type === 'regular') return true;
-    if (spot.type === 'handicap' && user?.hasHandicapPlacard) return true;
-    return spot.type === 'ev' && user?.hasEv;
-  };
-
   // Separate odd and even numbered spots
   const oddSpots = parkingSpots.filter(spot => parseInt(spot.spotNumber) % 2 !== 0 && spot.spotNumber.startsWith(selectedFloor));
   const evenSpots = parkingSpots.filter(spot => parseInt(spot.spotNumber) % 2 === 0 && spot.spotNumber.startsWith(selectedFloor));
 
   return (
-    <DashboardContainer>
+    <DashboardContainer data-testid="employee-dashboard-desktop">
       <Header>
-        <Logo src={LowesLogo} alt="Lowe's Logo" />
-        {user && <WelcomeMessage>Welcome, {user.firstName}</WelcomeMessage>}
+        <Logo src={LowesLogo} alt="Lowe's Logo" data-testid="lowes-logo" />
+        {user && <WelcomeMessage data-testid="welcome-message">Welcome, {user.firstName}</WelcomeMessage>}
       </Header>
 
       <MainContent>
         <FloorSelectContainer>
           <FloorSelectLabel>Select Floor</FloorSelectLabel>
-          <FloorSelect value={selectedFloor} onChange={handleFloorChange}>
+          <FloorSelect value={selectedFloor} onChange={handleFloorChange} data-testid="floor-select">
             <option value="1">Floor 1</option>
             <option value="2">Floor 2</option>
             <option value="3">Floor 3</option>
@@ -45,6 +38,7 @@ const EmployeeDashboardDesktop = ({ user, parkingSpots, gates, selectedFloor, ha
                   key={spot.id}
                   onClick={() => handleParking(spot)}
                   className={getButtonClass(spot)}
+                  data-testid={`parking-button-${spot.spotNumber}`}
                 >
                   {getIconForSpot(spot)}
                   <span>{spot.spotNumber}</span>
@@ -62,6 +56,7 @@ const EmployeeDashboardDesktop = ({ user, parkingSpots, gates, selectedFloor, ha
                   key={spot.id}
                   onClick={() => handleParking(spot)}
                   className={getButtonClass(spot)}
+                  data-testid={`parking-button-${spot.spotNumber}`}
                 >
                   {getIconForSpot(spot)}
                   <span>{spot.spotNumber}</span>
@@ -72,16 +67,16 @@ const EmployeeDashboardDesktop = ({ user, parkingSpots, gates, selectedFloor, ha
 
         <GateStatusContainer>
           {gates.map(gate => (
-            <GateStatus key={gate.id}>
+            <GateStatus key={gate.id} data-testid={`gate-status-${gate.id}`}>
               <GateIcon className={gate.operational ? 'gate-open' : 'gate-closed'}>
-                {gate.operational ? <LockOpenIcon /> : <LockIcon />}
+                {gate.operational ? <LockOpenIcon data-testid={`gate-icon-open-${gate.id}`} /> : <LockIcon data-testid={`gate-icon-closed-${gate.id}`} />}
               </GateIcon>
               <GateName>{gate.gateName} {gate.operational ? '(Open)' : '(Closed)'}</GateName>
             </GateStatus>
           ))}
         </GateStatusContainer>
 
-        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+        <LogoutButton onClick={handleLogout} data-testid="logout-button-desktop">Logout</LogoutButton>
       </MainContent>
     </DashboardContainer>
   );
@@ -91,10 +86,9 @@ const DashboardContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    //padding: 20px;
     background-color: #f4f4f9;
     height: 100vh;
-    max-width:1000px;
+    max-width: 1000px;
     margin: 0 auto;
     overflow: hidden;
 `;
@@ -125,7 +119,6 @@ const MainContent = styled.div`
     justify-content: center;
     flex: 1;
     width: 100%;
-    //overflow-y: auto;
 `;
 
 const FloorSelectContainer = styled.div`

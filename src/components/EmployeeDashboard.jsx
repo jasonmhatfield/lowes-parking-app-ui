@@ -8,7 +8,7 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
-import EmployeeParkingModal from '../modals/EmployeeParkingModal';  // Import the new modal
+import EmployeeParkingModal from '../modals/EmployeeParkingModal';
 
 const EmployeeDashboard = () => {
   const [parkingSpots, setParkingSpots] = useState([]);
@@ -70,7 +70,7 @@ const EmployeeDashboard = () => {
         );
         if (updatedSpot.userId !== user.id && userParkingSpotId === updatedSpot.id) {
           setUserParkingSpotId(null);
-          setParkingModalOpen(false);  // Close modal if user leaves the spot
+          setParkingModalOpen(false);
         }
       });
     });
@@ -153,6 +153,7 @@ const EmployeeDashboard = () => {
           handleParking={handleParking}
           getIconForSpot={getIconForSpot}
           handleLogout={handleLogout}
+          data-testid="employee-dashboard-mobile"
         />
       ) : (
         <EmployeeDashboardDesktop
@@ -165,6 +166,7 @@ const EmployeeDashboard = () => {
           getButtonClass={getButtonClass}
           getIconForSpot={getIconForSpot}
           handleLogout={handleLogout}
+          data-testid="employee-dashboard-desktop"
         />
       )}
 
@@ -173,6 +175,7 @@ const EmployeeDashboard = () => {
         userParkingSpotId={userParkingSpotId}
         parkingSpots={parkingSpots}
         handleParking={handleParking}
+        data-testid="employee-parking-modal"
       />
     </>
   );

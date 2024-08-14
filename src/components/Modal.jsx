@@ -18,8 +18,20 @@ const Modal = ({ open, onClose, children }) => {
   if (!isMounted) return null;
 
   return (
-    <ModalOverlay shouldAnimate={shouldAnimate} onClick={onClose}>
-      <ModalContent shouldAnimate={shouldAnimate} onClick={(e) => e.stopPropagation()}>
+    <ModalOverlay
+      data-testid="modal-overlay"
+      shouldAnimate={shouldAnimate}
+      onClick={onClose}
+    >
+      <ModalContent
+        data-testid="modal-content"
+        shouldAnimate={shouldAnimate}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
         {children}
       </ModalContent>
     </ModalOverlay>

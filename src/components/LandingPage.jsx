@@ -38,9 +38,9 @@ const LandingPage = () => {
   );
 
   return (
-    <PageContainer className="landing-page-body">
+    <PageContainer data-testid="landing-page">
       <Header>
-        <Logo src={LowesLogo} alt="Lowe's Logo" />
+        <Logo src={LowesLogo} alt="Lowe's Logo" data-testid="lowes-logo" />
         <Title>Welcome to Lowe's <span><br /></span>Parking Management</Title>
         <Subtitle>Manage your parking efficiently and effortlessly.</Subtitle>
       </Header>
@@ -48,11 +48,11 @@ const LandingPage = () => {
       <LoginSection>
         <SectionTitle>Select a User to Login</SectionTitle>
         {loading ? (
-          <LoadingMessage>Loading users...</LoadingMessage>
+          <LoadingMessage data-testid="loading-message">Loading users...</LoadingMessage>
         ) : (
           <LoginButtons>
             {filteredUsers.map((user) => (
-              <LoginButton key={user.id} onClick={() => handleLogin(user)}>
+              <LoginButton key={user.id} onClick={() => handleLogin(user)} data-testid={`login-button-${user.firstName.toLowerCase()}`}>
                 {user.firstName} {user.lastName}
               </LoginButton>
             ))}
@@ -165,8 +165,8 @@ const LoginButton = styled.button`
 `;
 
 const LoadingMessage = styled.p`
-  font-size: 1.2rem;
-  color: #33334d;
+    font-size: 1.2rem;
+    color: #33334d;
 `;
 
 export default LandingPage;
