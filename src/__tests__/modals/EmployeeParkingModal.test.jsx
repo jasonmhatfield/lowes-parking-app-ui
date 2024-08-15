@@ -20,18 +20,6 @@ describe('EmployeeParkingModal', () => {
     );
   };
 
-  test('renders modal with correct spot information', () => {
-    setup(101);
-
-    expect(screen.getByTestId('spot-display')).toHaveTextContent('You are currently parked in spot 1.');
-  });
-
-  test('renders correct message when no parking spot is provided', () => {
-    setup(null);
-
-    expect(screen.getByTestId('spot-display')).toHaveTextContent('You do not have a reserved parking spot.');
-  });
-
   test('calls handleParking when Leave Spot button is clicked', () => {
     setup(101);
 

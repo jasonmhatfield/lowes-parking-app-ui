@@ -4,7 +4,6 @@ import ManageParkingSpacesModal from '../modals/ManageParkingSpacesModal';
 import ManageUsersModal from '../modals/ManageUsersModal';
 import AddUserModal from '../modals/AddUserModal';
 import { useNavigate } from 'react-router-dom';
-import '../styles/components/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [showGatesModal, setShowGatesModal] = useState(false);
@@ -34,16 +33,16 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="wrapper">
-      <div className="dashboard-container">
-        <h1 className="title">Admin Dashboard</h1>
+    <div style={styles.wrapper}>
+      <div style={styles.dashboardContainer}>
+        <h1 style={styles.title}>Admin Dashboard</h1>
 
-        <div className="dashboard-actions">
-          <button className="action-button" onClick={() => setShowGatesModal(true)}>Manage Gates</button>
-          <button className="action-button" onClick={() => setShowParkingSpacesModal(true)}>Manage Parking Spaces</button>
-          <button className="action-button" onClick={() => setShowUsersModal(true)}>Manage Users</button>
-          <button className="action-button" onClick={() => setShowAddUserModal(true)}>Add User</button>
-          <button className="logout-button" onClick={handleLogout}>Logout</button>
+        <div style={styles.dashboardActions}>
+          <button style={styles.actionButton} onClick={() => setShowGatesModal(true)}>Manage Gates</button>
+          <button style={styles.actionButton} onClick={() => setShowParkingSpacesModal(true)}>Manage Parking Spaces</button>
+          <button style={styles.actionButton} onClick={() => setShowUsersModal(true)}>Manage Users</button>
+          <button style={styles.actionButton} onClick={() => setShowAddUserModal(true)}>Add User</button>
+          <button style={styles.logoutButton} onClick={handleLogout}>Logout</button>
         </div>
 
         {showGatesModal && <ManageGatesModal onClose={() => setShowGatesModal(false)} />}
@@ -53,6 +52,73 @@ const AdminDashboard = () => {
       </div>
     </div>
   );
+};
+
+const styles = {
+  wrapper: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    backgroundColor: '#1a1a2e',
+    overflow: 'auto',
+  },
+  dashboardContainer: {
+    padding: '20px',
+    background: '#1e1e2f',
+    borderRadius: '12px',
+    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.5)',
+    color: '#ffffff',
+    maxWidth: '400px',
+    width: '100%',
+    maxHeight: '90vh',
+    overflowY: 'auto',
+  },
+  title: {
+    fontSize: '2.5rem',
+    textAlign: 'center',
+    marginBottom: '20px',
+    color: '#ffffff',
+  },
+  dashboardActions: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: '30px',
+  },
+  actionButton: {
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, transform 0.3s ease',
+    fontSize: '1.2em',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+    marginBottom: '20px',
+    width: '80%',
+    padding: '15px 30px',
+    backgroundColor: '#1976D2',
+    color: '#fff',
+  },
+  actionButtonHover: {
+    backgroundColor: '#0056b3',
+    transform: 'translateY(-2px)',
+  },
+  logoutButton: {
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, transform 0.3s ease',
+    fontSize: '1em',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+    width: '70%',
+    padding: '10px 20px',
+    backgroundColor: '#ff4757',
+    color: 'white',
+  },
+  logoutButtonHover: {
+    backgroundColor: '#e04040',
+    transform: 'translateY(-2px)',
+  },
 };
 
 export default AdminDashboard;

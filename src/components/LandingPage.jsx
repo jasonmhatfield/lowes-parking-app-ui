@@ -34,7 +34,7 @@ const LandingPage = () => {
   };
 
   const filteredUsers = users.filter(
-    (user) => ['Jason', 'Michael', 'Emily'].includes(user.firstName)
+    (user) => ['Admin', 'Mark', 'Emily'].includes(user.firstName)
   );
 
   return (
@@ -96,6 +96,7 @@ const PageContainer = styled.div`
 const Header = styled.header`
     text-align: center;
     padding: 20px;
+    margin-top: 50px;
     background-color: #004792;
     color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 
-const Modal = ({ open, onClose, children }) => {
+const Modal = ({ open, children, overlayStyle }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
@@ -21,12 +21,11 @@ const Modal = ({ open, onClose, children }) => {
     <ModalOverlay
       data-testid="modal-overlay"
       shouldAnimate={shouldAnimate}
-      onClick={onClose}
+      style={overlayStyle}
     >
       <ModalContent
         data-testid="modal-content"
         shouldAnimate={shouldAnimate}
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -66,7 +65,7 @@ const ModalOverlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.3);  /* Default background */
     display: ${({ shouldAnimate }) => (shouldAnimate ? 'flex' : 'none')};
     justify-content: center;
     align-items: center;

@@ -15,7 +15,7 @@ describe('parkingSpotsService', () => {
   });
 
   describe('fetchParkingSpotsData', () => {
-    it('fetches parking spots and associated users', async () => {
+    test('fetches parking spots and associated users', async () => {
       const mockParkingSpots = [
         { id: 1, spotNumber: 'A1', userId: 1 },
         { id: 2, spotNumber: 'A2', userId: null },
@@ -47,7 +47,7 @@ describe('parkingSpotsService', () => {
       expect(fetchMock).toHaveBeenNthCalledWith(3, 'http://localhost:8080/api/users/2');
     });
 
-    it('handles error when fetching parking spots', async () => {
+    test('handles error when fetching parking spots', async () => {
       fetchMock.mockRejectOnce(new Error('Failed to fetch parking spots'));
 
       await expect(fetchParkingSpotsData()).rejects.toThrow('Failed to fetch parking spots');
@@ -55,7 +55,7 @@ describe('parkingSpotsService', () => {
   });
 
   describe('removeUserFromSpot', () => {
-    it('removes user from parking spot successfully', async () => {
+    test('removes user from parking spot successfully', async () => {
       const mockResponse = { id: 1, spotNumber: 'A1', userId: null, occupied: false };
       fetchMock.mockResponseOnce(JSON.stringify(mockResponse));
 
@@ -69,7 +69,7 @@ describe('parkingSpotsService', () => {
       });
     });
 
-    it('throws error when removing user fails', async () => {
+    test('throws error when removing user fails', async () => {
       fetchMock.mockResponseOnce(JSON.stringify({}), { status: 500 });
 
       await expect(removeUserFromSpot(1)).rejects.toThrow('Error removing user from spot.');
@@ -77,7 +77,7 @@ describe('parkingSpotsService', () => {
   });
 
   describe('setupWebSocketConnection', () => {
-    it('sets up WebSocket connection and handles incoming messages', () => {
+    test('sets up WebSocket connection and handles incoming messages', () => {
       const mockStompClient = {
         connect: jest.fn((headers, callback) => callback()),
         subscribe: jest.fn(),
@@ -95,7 +95,7 @@ describe('parkingSpotsService', () => {
       expect(mockStompClient.subscribe).toHaveBeenCalledWith('/topic/parkingSpots', expect.any(Function));
     });
 
-    it('handles incoming WebSocket messages', () => {
+    test('handles incoming WebSocket messages', () => {
       const mockStompClient = {
         connect: jest.fn((headers, callback) => callback()),
         subscribe: jest.fn((topic, callback) => {

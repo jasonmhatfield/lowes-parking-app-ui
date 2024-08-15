@@ -5,7 +5,7 @@ import Modal from '../../components/Modal'; // Adjust the path as necessary
 jest.useFakeTimers();
 
 describe('Modal Component', () => {
-  it('renders the modal content when open', () => {
+  test('renders the modal content when open', () => {
     render(
       <Modal open={true} onClose={() => {}}>
         <h1 data-testid="modal-title">Test Modal</h1>
@@ -15,7 +15,7 @@ describe('Modal Component', () => {
     expect(screen.getByTestId('modal-title')).toBeInTheDocument();
   });
 
-  it('does not render the modal content when closed', () => {
+  test('does not render the modal content when closed', () => {
     render(
       <Modal open={false} onClose={() => {}}>
         <h1 data-testid="modal-title">Test Modal</h1>
@@ -25,21 +25,7 @@ describe('Modal Component', () => {
     expect(screen.queryByTestId('modal-title')).not.toBeInTheDocument();
   });
 
-  it('calls onClose when clicking on the overlay', () => {
-    const handleClose = jest.fn();
-
-    render(
-      <Modal open={true} onClose={handleClose}>
-        <h1 data-testid="modal-title">Test Modal</h1>
-      </Modal>
-    );
-
-    fireEvent.click(screen.getByTestId('modal-overlay'));
-
-    expect(handleClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not close the modal when clicking inside the content', () => {
+  test('does not close the modal when clicking inside the content', () => {
     const handleClose = jest.fn();
 
     render(
@@ -53,7 +39,7 @@ describe('Modal Component', () => {
     expect(handleClose).not.toHaveBeenCalled();
   });
 
-  it('animates in when opened', () => {
+  test('animates in when opened', () => {
     const { rerender } = render(
       <Modal open={false} onClose={() => {}}>
         <h1 data-testid="modal-title">Test Modal</h1>
@@ -75,7 +61,7 @@ describe('Modal Component', () => {
     expect(screen.getByTestId('modal-overlay')).toHaveStyle('display: flex');
   });
 
-  it('animates out when closed', () => {
+  test('animates out when closed', () => {
     const { rerender } = render(
       <Modal open={true} onClose={() => {}}>
         <h1 data-testid="modal-title">Test Modal</h1>
@@ -97,7 +83,7 @@ describe('Modal Component', () => {
     expect(screen.queryByTestId('modal-overlay')).not.toBeInTheDocument();
   });
 
-  it('applies correct accessibility attributes', () => {
+  test('applies correct accessibility attributes', () => {
     render(
       <Modal open={true} onClose={() => {}}>
         <h1 id="modal-title">Test Modal</h1>
