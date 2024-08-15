@@ -32,8 +32,8 @@ describe('LandingPage', () => {
 
   test('renders login buttons for filtered users after loading', async () => {
     const users = [
-      { id: 1, firstName: 'Jason', lastName: 'Hatfield', role: 'employee' },
-      { id: 2, firstName: 'Michael', lastName: 'Smith', role: 'admin' },
+      { id: 1, firstName: 'Admin', lastName: 'User', role: 'employee' },
+      { id: 2, firstName: 'Mark', lastName: 'Jess', role: 'admin' },
       { id: 3, firstName: 'Emily', lastName: 'Jones', role: 'employee' },
     ];
 
@@ -42,33 +42,31 @@ describe('LandingPage', () => {
     render(<LandingPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('login-button-jason')).toBeInTheDocument();
-      expect(screen.getByTestId('login-button-michael')).toBeInTheDocument();
+      expect(screen.getByTestId('login-button-admin')).toBeInTheDocument();
+      expect(screen.getByTestId('login-button-mark')).toBeInTheDocument();
       expect(screen.getByTestId('login-button-emily')).toBeInTheDocument();
     });
   });
 
   test('handles login button click and navigates based on user role', async () => {
     const users = [
-      { id: 1, firstName: 'Jason', lastName: 'Hatfield', role: 'employee' },
-      { id: 2, firstName: 'Michael', lastName: 'Smith', role: 'admin' },
+      { id: 1, firstName: 'Admin', lastName: 'User', role: 'admin' },
+      { id: 2, firstName: 'Mark', lastName: 'Jess', role: 'employee' },
     ];
 
     fetch.mockResponseOnce(JSON.stringify(users));
 
     render(<LandingPage />);
 
-    await waitFor(() => screen.getByTestId('login-button-jason'));
+    await waitFor(() => screen.getByTestId('login-button-admin'));
 
-    const jasonButton = screen.getByTestId('login-button-jason');
-    fireEvent.click(jasonButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/employee-dashboard');
-
-    const michaelButton = screen.getByTestId('login-button-michael');
-    fireEvent.click(michaelButton);
-
+    const adminButton = screen.getByTestId('login-button-admin');
+    fireEvent.click(adminButton);
     expect(mockNavigate).toHaveBeenCalledWith('/admin-dashboard');
+
+    const markButton = screen.getByTestId('login-button-mark');
+    fireEvent.click(markButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/employee-dashboard');
   });
 
   test('displays an error message when failing to fetch users', async () => {
@@ -78,8 +76,8 @@ describe('LandingPage', () => {
 
     await waitFor(() => expect(screen.getByText('Loading users...')).toBeInTheDocument());
 
-    expect(screen.queryByTestId('login-button-jason')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('login-button-michael')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('login-button-admin')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('login-button-mark')).not.toBeInTheDocument();
     expect(screen.queryByTestId('login-button-emily')).not.toBeInTheDocument();
   });
 });

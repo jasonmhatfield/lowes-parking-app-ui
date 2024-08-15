@@ -27,7 +27,7 @@ describe('ManageUsersModal', () => {
     console.error.mockRestore(); // Restore original console.error after each test
   });
 
-  it('filters users based on search input', async () => {
+  test('filters users based on search input', async () => {
     setup();
     await screen.findByText(/John\s*Doe/);
 
@@ -37,7 +37,7 @@ describe('ManageUsersModal', () => {
     expect(screen.getByText(/Jane\s*Smith/)).toBeInTheDocument();
   });
 
-  it('sorts users by first name', async () => {
+  test('sorts users by first name', async () => {
     setup();
     await screen.findByText(/John\s*Doe/);
 
@@ -48,7 +48,7 @@ describe('ManageUsersModal', () => {
     expect(userItems[1]).toHaveTextContent(/John\s*Doe/);
   });
 
-  it('sorts users by last name', async () => {
+  test('sorts users by last name', async () => {
     setup();
     await screen.findByText(/John\s*Doe/);
 
@@ -59,7 +59,7 @@ describe('ManageUsersModal', () => {
     expect(userItems[1]).toHaveTextContent(/Jane\s*Smith/);
   });
 
-  it('opens EditUserModal when a user is clicked and saves edited user', async () => {
+  test('opens EditUserModal when a user is clicked and saves edited user', async () => {
     setup();
     await screen.findByText(/John\s*Doe/);
 
@@ -77,7 +77,7 @@ describe('ManageUsersModal', () => {
     await waitFor(() => expect(screen.queryByText('Edit User')).not.toBeInTheDocument());
   });
 
-  it('closes modal on close button click', async () => {
+  test('closes modal on close button click', async () => {
     const onCloseMock = jest.fn();
     setup({ onClose: onCloseMock });
     await screen.findByText(/John\s*Doe/);
@@ -87,7 +87,7 @@ describe('ManageUsersModal', () => {
     expect(onCloseMock).toHaveBeenCalled();
   });
 
-  it('handles save user error correctly', async () => {
+  test('handles save user error correctly', async () => {
     setup();
     await screen.findByText(/John\s*Doe/);
 
@@ -104,7 +104,7 @@ describe('ManageUsersModal', () => {
   });
 
   // New test to ensure coverage of `console.error('Error saving user');`
-  it('logs an error when response is not ok', async () => {
+  test('logs an error when response is not ok', async () => {
     setup();
     await screen.findByText(/John\s*Doe/);
 
