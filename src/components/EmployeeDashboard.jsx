@@ -72,7 +72,7 @@ const EmployeeDashboard = () => {
       });
 
       if (!response.ok) {
-        console.error('Failed to update parking spot.'); // This should match the test expectation
+        console.error('Failed to update parking spot.');
         return;
       }
 
@@ -121,9 +121,9 @@ const EmployeeDashboard = () => {
         {user && <h1 className="WelcomeMessage">Welcome, {user.firstName}</h1>}
       </header>
 
-      <div className="MainContent" data-testid="main-content">
+      <div className="MainContent">
         <div className="FloorSelectContainer">
-          <label className="FloorSelectLabel" htmlFor="floorSelect">Select Floor</label>
+          <label htmlFor="floorSelect" className="FloorSelectLabel">Select Floor</label>
           <select
             id="floorSelect"
             value={selectedFloor}
@@ -136,15 +136,14 @@ const EmployeeDashboard = () => {
           </select>
         </div>
 
-        <div className="ParkingGarage" data-testid="parking-garage">
-          <div className="ParkingRow" data-testid="parking-row">
+        <div className="ParkingGarage">
+          <div className="ParkingRow">
             {filteredParkingSpots(false).map((spot) => (
               <button
                 key={spot.id}
                 onClick={() => canParkInSpot(spot) && handleParking(spot)}
                 className={`ParkingButton ${spot.id === userParkingSpotId ? 'green' : canParkInSpot(spot) ? 'blue' : 'grey'}`}
                 aria-label={`Parking spot ${spot.spotNumber}`}
-                data-testid={`parking-spot-${spot.spotNumber}`}
               >
                 {getIconForSpot(spot)}
                 <span>{spot.spotNumber}</span>
@@ -153,17 +152,16 @@ const EmployeeDashboard = () => {
           </div>
 
           <div className="ParkingRoad">
-            <div className="RoadLine"/>
+            <div className="RoadLine" />
           </div>
 
-          <div className="ParkingRow" data-testid="parking-row">
+          <div className="ParkingRow">
             {filteredParkingSpots(true).map((spot) => (
               <button
                 key={spot.id}
                 onClick={() => canParkInSpot(spot) && handleParking(spot)}
                 className={`ParkingButton ${spot.id === userParkingSpotId ? 'green' : canParkInSpot(spot) ? 'blue' : 'grey'}`}
                 aria-label={`Parking spot ${spot.spotNumber}`}
-                data-testid={`parking-spot-${spot.spotNumber}`}
               >
                 {getIconForSpot(spot)}
                 <span>{spot.spotNumber}</span>
@@ -176,7 +174,7 @@ const EmployeeDashboard = () => {
           {gates.map((gate) => (
             <div key={gate.id} className="GateStatus">
               <div className={`GateIcon ${gate.operational ? 'gate-open' : 'gate-closed'}`}>
-                <DirectionsCarIcon/>
+                <DirectionsCarIcon />
               </div>
               <span className="GateName">
                 {gate.gateName} {gate.operational ? '(Open)' : '(Closed)'}
