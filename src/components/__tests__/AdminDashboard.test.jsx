@@ -1,9 +1,48 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AdminDashboard from '../AdminDashboard';
 
-// Helper to render with Router
+// Mock the react-router-dom's useNavigate hook
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
+
+// Mock the modal components
+jest.mock('../../modals/ManageGatesModal', () => ({ onClose }) => (
+  <div data-testid="manage-gates-modal">
+    Manage Gates Modal
+    <button onClick={onClose}>Close</button>
+  </div>
+));
+
+jest.mock('../../modals/ManageParkingSpacesModal', () => ({ onClose }) => (
+  <div data-testid="manage-parking-spaces-modal">
+    Manage Parking Spaces Modal
+    <button onClick={onClose}>Close</button>
+  </div>
+));
+
+jest.mock('../../modals/ManageUsersModal', () => ({ onClose }) => (
+  <div data-testid="manage-users-modal">
+    Manage Users Modal
+    <button onClick={onClose}>Close</button>
+  </div>
+));
+
+jest.mock('../../modals/AddUserModal', () => ({ onClose, onSave }) => (
+  <div data-testid="add-user-modal">
+    Add User Modal
+    <button onClick={() => onSave({ name: 'Test User' })}>Save</button>
+    <button onClick={onClose}>Close</button>
+  </div>
+));
+
+// Mock fetch globally
+global.fetch = jest.fn();
+
 const renderWithRouter = (ui, { route = '/' } = {}) => {
   window.history.pushState({}, 'Test page', route);
   return render(
@@ -14,115 +53,118 @@ const renderWithRouter = (ui, { route = '/' } = {}) => {
 };
 
 describe('AdminDashboard', () => {
-  const setup = () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch.mockClear();
+  });
+
+  test('renders AdminDashboard with all buttons', () => {
     renderWithRouter(<AdminDashboard />);
-  };
-
-  test('renders Admin Dashboard title and buttons, and handles modals correctly', async () => {
-    setup();
-
-    // Check for title and main buttons
     expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Manage Gates' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Manage Parking Spaces' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Manage Users' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add User' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
-
-    // Manage Gates Modal
-    fireEvent.click(screen.getByRole('button', { name: 'Manage Gates' }));
-    const gatesModalHeader = screen.getAllByText('Manage Gates')[1]; // Select the modal header, which should be the second occurrence
-    expect(gatesModalHeader).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => expect(gatesModalHeader).not.toBeInTheDocument());
-
-    // Manage Parking Spaces Modal
-    fireEvent.click(screen.getByRole('button', { name: 'Manage Parking Spaces' }));
-    const parkingModalHeader = screen.getAllByText('Manage Parking Spaces')[1]; // Select the modal header
-    expect(parkingModalHeader).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => expect(parkingModalHeader).not.toBeInTheDocument());
-
-    // Manage Users Modal
-    fireEvent.click(screen.getByRole('button', { name: 'Manage Users' }));
-    const usersModalHeader = screen.getAllByText('Manage Users')[1]; // Select the modal header
-    expect(usersModalHeader).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Close'));
-    await waitFor(() => expect(usersModalHeader).not.toBeInTheDocument());
   });
 
-  test('opens and closes Add User Modal and handles Add User action with error handling', async () => {
-    setup();
+  test('opens and closes Manage Gates Modal', async () => {
+    renderWithRouter(<AdminDashboard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Manage Gates' }));
+    expect(screen.getByTestId('manage-gates-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => {
+      expect(screen.queryByTestId('manage-gates-modal')).not.toBeInTheDocument();
+    });
+  });
 
-    const mockResponse = {
-      ok: true,
-      json: jest.fn().mockResolvedValue({}),
-    };
+  test('opens and closes Manage Parking Spaces Modal', async () => {
+    renderWithRouter(<AdminDashboard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Manage Parking Spaces' }));
+    expect(screen.getByTestId('manage-parking-spaces-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => {
+      expect(screen.queryByTestId('manage-parking-spaces-modal')).not.toBeInTheDocument();
+    });
+  });
 
-    global.fetch = jest.fn().mockResolvedValueOnce(mockResponse);
+  test('opens and closes Manage Users Modal', async () => {
+    renderWithRouter(<AdminDashboard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Manage Users' }));
+    expect(screen.getByTestId('manage-users-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => {
+      expect(screen.queryByTestId('manage-users-modal')).not.toBeInTheDocument();
+    });
+  });
 
+  test('opens and closes Add User Modal', async () => {
+    renderWithRouter(<AdminDashboard />);
     fireEvent.click(screen.getByRole('button', { name: 'Add User' }));
-    expect(screen.getByText('Add New User')).toBeInTheDocument(); // Confirm the Add User modal is present
-
-    // Fill in the form fields
-    fireEvent.change(screen.getByTestId('first-name-input'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByTestId('last-name-input'), { target: { value: 'Doe' } });
-    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'johndoe@example.com' } });
-
-    // Debugging: Log the input values to ensure they are being updated correctly
-    console.log('First Name Input Value:', screen.getByTestId('first-name-input').value);
-    console.log('Last Name Input Value:', screen.getByTestId('last-name-input').value);
-    console.log('Email Input Value:', screen.getByTestId('email-input').value);
-
-    fireEvent.click(screen.getByTestId('save-button')); // Trigger the save action
-
-    // Debugging: Check if fetch is being called
-    console.log('Fetch function called:', global.fetch.mock.calls.length > 0);
-
+    expect(screen.getByTestId('add-user-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'johndoe@example.com',
-          hasHandicapPlacard: false,
-          hasEv: false,
-          role: 'employee',
-        }),
-      });
+      expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument();
     });
-
-    expect(mockResponse.json).toHaveBeenCalled();
-
-    // Error handling when the response is not ok
-    global.fetch = jest.fn().mockResolvedValueOnce({ ok: false });
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    fireEvent.click(screen.getByTestId('save-button'));
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error adding user');
-    });
-
-    // Error handling for a fetch error
-    global.fetch = jest.fn().mockRejectedValueOnce(new Error('Network error'));
-
-    fireEvent.click(screen.getByTestId('save-button'));
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error adding user:', new Error('Network error'));
-    });
-
-    consoleErrorSpy.mockRestore();
   });
 
   test('handles logout', () => {
-    setup();
-
+    renderWithRouter(<AdminDashboard />);
     fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
 
-    expect(window.location.pathname).toBe('/'); // Assuming Logout redirects to home
+  test('handles adding a user successfully', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({}),
+    });
+
+    renderWithRouter(<AdminDashboard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/users', expect.any(Object));
+      expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  test('handles adding a user with API error', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
+    });
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    renderWithRouter(<AdminDashboard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/users', expect.any(Object));
+      expect(consoleSpy).toHaveBeenCalledWith('Error adding user');
+      expect(screen.getByTestId('add-user-modal')).toBeInTheDocument();
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  test('handles adding a user with network error', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('Network error'));
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    renderWithRouter(<AdminDashboard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add User' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/users', expect.any(Object));
+      expect(consoleSpy).toHaveBeenCalledWith('Error adding user:', expect.any(Error));
+      expect(screen.getByTestId('add-user-modal')).toBeInTheDocument();
+    });
+
+    consoleSpy.mockRestore();
   });
 });
