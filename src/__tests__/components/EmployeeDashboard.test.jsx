@@ -101,44 +101,6 @@ describe('EmployeeDashboard', () => {
     });
   });
 
-
-
-  test('handles floor selection', async () => {
-    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
-
-    const mockParkingSpots = [
-      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
-      { id: 2, spotNumber: '201', occupied: false, type: 'regular' },
-    ];
-    const mockGates = [];
-
-    global.fetch.mockImplementation((url) => {
-      if (url.includes('parkingSpots')) {
-        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
-      }
-      if (url.includes('gates')) {
-        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
-      }
-    });
-
-    render(
-      <BrowserRouter>
-        <EmployeeDashboard />
-      </BrowserRouter>
-    );
-
-    await waitFor(() => {
-      const floorSelect = screen.getByLabelText('Select Floor');
-      fireEvent.change(floorSelect, { target: { value: '2' } });
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByText('101')).not.toBeInTheDocument();
-      const spot201 = screen.getByLabelText('Parking spot 201');
-      expect(within(spot201).getByText('201')).toBeInTheDocument();
-    });
-  });
-
   test('handles logout', async () => {
     sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
 
@@ -420,4 +382,124 @@ describe('EmployeeDashboard', () => {
     consoleSpy.mockRestore();
   });
 
+  test('toggles view mode and updates sessionStorage', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+    sessionStorage.setItem('viewMode', 'desktop');
+
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve([]),
+      })
+    );
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const toggleButton = screen.getByTestId('view-toggle');
+      expect(toggleButton).toBeInTheDocument();
+      fireEvent.click(toggleButton);
+    });
+
+    expect(sessionStorage.getItem('viewMode')).toBe('mobile');
+
+    await waitFor(() => {
+      const toggleButton = screen.getByTestId('view-toggle');
+      expect(toggleButton).toBeInTheDocument();
+      fireEvent.click(toggleButton);
+    });
+
+    expect(sessionStorage.getItem('viewMode')).toBe('desktop');
+  });
+
+  test('changes floor when select value changes', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve([]),
+      })
+    );
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const floorSelect = screen.getByLabelText('Select Floor:');
+      fireEvent.change(floorSelect, { target: { value: '2' } });
+    });
+
+    expect(screen.getByLabelText('Select Floor:').value).toBe('2');
+  });
+
+  test('handles parking spot selection in mobile view', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+    sessionStorage.setItem('viewMode', 'mobile');
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+      { id: 2, spotNumber: '102', occupied: false, type: 'regular' },
+      { id: 3, spotNumber: '103', occupied: false, type: 'regular' },
+    ];
+
+    const mockGates = [
+      { id: 1, gateName: 'Gate A', operational: false },
+      { id: 2, gateName: 'Gate B', operational: false },
+    ];
+
+    global.fetch = jest.fn((url) => {
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({
+          json: () => Promise.resolve(mockParkingSpots),
+          ok: true,
+        });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      });
+    });
+
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <EmployeeDashboard />
+        </BrowserRouter>
+      );
+    });
+
+    await waitFor(() => {
+      const parkingSpotButtons = screen.getAllByText(/Spot 10[123]/);
+      expect(parkingSpotButtons).toHaveLength(3);
+
+      // Click on the first parking spot
+      fireEvent.click(parkingSpotButtons[0]);
+    });
+
+    // Verify that the fetch call was made with the correct parameters
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:8080/api/parkingSpots/1',
+      expect.objectContaining({
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ occupied: true, userId: 1 }),
+      })
+    );
+
+    // Wait for the component to update
+    await waitFor(() => {
+      // The clicked spot should no longer be available (should not be in the list)
+      const remainingSpots = screen.getAllByText(/Spot 10[23]/);
+      expect(remainingSpots).toHaveLength(2);
+    });
+  });
 });

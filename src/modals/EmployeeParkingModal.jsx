@@ -1,8 +1,8 @@
 import React from 'react';
-import { FaParking, FaMapMarkerAlt, FaCar } from 'react-icons/fa';
+import { FaParking, FaCar } from 'react-icons/fa';
 import Modal from '../components/Modal';
 
-const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handleParking }) => {
+const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handleParking, isMobile }) => {
   const userSpot = parkingSpots.find((spot) => spot.id === userParkingSpotId);
 
   const getFloorAndSpot = (spotNumber) => {
@@ -14,7 +14,7 @@ const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handlePar
   const userSpotDetails = userSpot ? getFloorAndSpot(userSpot.spotNumber) : null;
 
   return (
-    <Modal open={open} overlayStyle={styles.overlay}>
+    <Modal open={open} isMobile={isMobile}>
       <h2 style={styles.modalTitle}>
         <FaParking style={styles.icon} /> Parking Spot Details
       </h2>
