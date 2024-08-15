@@ -1,0 +1,86 @@
+/* ManageGatesModal.css */
+
+.modal-content {
+    background-color: #1e1e2f;
+    padding: 20px;
+    border-radius: 12px;
+    width: 360px;
+    height: 400px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    font-size: 1.8rem;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    max-height: calc(100% - 100px);
+    overflow-y: auto;
+}
+
+.gate-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 60%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.gate-item.operational {
+    background-color: #4caf50;
+}
+
+.gate-item.not-operational {
+    background-color: #f44336;
+}
+
+.gate-item:hover {
+    transform: translateY(-2px);
+}
+
+.gate-name {
+    font-size: 1rem;
+    color: #ffffff;
+}
+
+.gate-icon {
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.close-button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #1976D2;
+    color: #ffffff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.close-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
