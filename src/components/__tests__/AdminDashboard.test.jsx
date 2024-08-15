@@ -1,119 +1,52 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import EmployeeDashboard from '../EmployeeDashboard';
+import { render, fireEvent, act, waitFor } from '@testing-library/react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import AdminDashboard from '../AdminDashboard';
 
-// Mocking SockJS and StompJS
-jest.mock('sockjs-client');
-jest.mock('@stomp/stompjs', () => ({
-  Stomp: {
-    over: () => ({
-      connect: (headers, callback) => callback(),
-      subscribe: (topic, callback) => {},
-      disconnect: jest.fn(),
-    }),
-  },
-}));
-
-describe('EmployeeDashboard', () => {
-  beforeEach(() => {
-    // Mock fetch to return empty arrays for parking spots and gates
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-    );
-
-    // Mocking sessionStorage methods
-    const mockSessionStorage = (() => {
-      let store = {};
-
-      return {
-        getItem: (key) => store[key] || null,
-        setItem: (key, value) => {
-          store[key] = value.toString();
-        },
-        clear: () => {
-          store = {};
-        },
-        removeItem: (key) => {
-          delete store[key];
-        }
-      };
-    })();
-
-    Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
-    window.sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John', hasHandicapPlacard: true, hasEv: true }));
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('renders the EmployeeDashboard with user data', async () => {
+describe('AdminDashboard', () => {
+  const renderComponent = () =>
     render(
-      <BrowserRouter>
-        <EmployeeDashboard />
-      </BrowserRouter>
+      <Router>
+        <AdminDashboard />
+      </Router>
     );
 
-    expect(screen.getByText(/Welcome, John/i)).toBeInTheDocument();
-    expect(screen.getByAltText("Lowe's Logo")).toBeInTheDocument();
+  it('renders Admin Dashboard title', () => {
+    const { getByTestId } = renderComponent();
+    expect(getByTestId('dashboard-title')).toHaveTextContent('Admin Dashboard');
   });
 
-  test('handles floor selection', async () => {
-    render(
-      <BrowserRouter>
-        <EmployeeDashboard />
-      </BrowserRouter>
-    );
+  it('opens and closes Add User Modal', async () => {
+    const { getByTestId, queryByTestId } = renderComponent();
 
-    const floorSelect = screen.getByLabelText(/Select Floor/i);
-    fireEvent.change(floorSelect, { target: { value: '2' } });
-    expect(floorSelect.value).toBe('2');
-  });
+    // Open the modal
+    await act(async () => {
+      fireEvent.click(getByTestId('add-user-button'));
+    });
 
-  test('opens and closes parking modal based on parking spot selection', async () => {
-    // Mock fetch to return parking spots
-    global.fetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([
-          { id: 1, spotNumber: '101', type: 'regular', occupied: false, userId: null },
-          { id: 2, spotNumber: '102', type: 'handicap', occupied: false, userId: null },
-        ]),
-      })
-    );
-
-    render(
-      <BrowserRouter>
-        <EmployeeDashboard />
-      </BrowserRouter>
-    );
-
+    // Wait for the modal to appear in the DOM
     await waitFor(() => {
-      const parkingButtons = screen.getAllByRole('button', { name: /101|102/ });
-      fireEvent.click(parkingButtons[0]); // Select first spot
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      fireEvent.click(parkingButtons[1]); // Select another spot
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(queryByTestId('add-user-modal')).toBeInTheDocument();
+    });
+
+    // Close the modal
+    await act(async () => {
+      fireEvent.click(getByTestId('cancel-button'));
+    });
+
+    // Wait for the modal to be removed from the DOM
+    await waitFor(() => {
+      expect(queryByTestId('add-user-modal')).not.toBeInTheDocument();
     });
   });
 
-  test('logs out user on logout button click', async () => {
-    render(
-      <BrowserRouter>
-        <EmployeeDashboard />
-      </BrowserRouter>
-    );
+  it('handles logout', async () => {
+    const { getByTestId } = renderComponent();
 
-    const logoutButton = screen.getByText(/Logout/i);
-    fireEvent.click(logoutButton);
-
-    await waitFor(() => {
-      expect(window.sessionStorage.getItem('loggedInUser')).toBe(null);
-      expect(window.location.pathname).toBe('/');
+    await act(async () => {
+      fireEvent.click(getByTestId('logout-button'));
     });
+
+    expect(window.location.pathname).toBe('/');
   });
 });

@@ -46,10 +46,10 @@ const AdminDashboard = () => {
           <LogoutButton data-testid="logout-button" onClick={handleLogout}>Logout</LogoutButton>
         </DashboardActions>
 
-        {showGatesModal && <ManageGatesModal onClose={() => setShowGatesModal(false)} />}
-        {showParkingSpacesModal && <ManageParkingSpacesModal onClose={() => setShowParkingSpacesModal(false)} />}
-        {showUsersModal && <ManageUsersModal onClose={() => setShowUsersModal(false)} />}
-        {showAddUserModal && <AddUserModal onClose={() => setShowAddUserModal(false)} onSave={handleAddUser} />}
+        {showGatesModal && <ManageGatesModal data-testid="manage-gates-modal" onClose={() => setShowGatesModal(false)} />}
+        {showParkingSpacesModal && <ManageParkingSpacesModal data-testid="manage-parking-spaces-modal" onClose={() => setShowParkingSpacesModal(false)} />}
+        {showUsersModal && <ManageUsersModal data-testid="manage-users-modal" onClose={() => setShowUsersModal(false)} />}
+        {showAddUserModal && <AddUserModal data-testid="add-user-modal" onClose={() => setShowAddUserModal(false)} onSave={handleAddUser} />}
       </DashboardContainer>
     </Wrapper>
   );

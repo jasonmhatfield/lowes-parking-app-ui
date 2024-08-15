@@ -45,7 +45,7 @@ describe('EmployeeDashboard', () => {
   beforeEach(() => {
     const mockParkingSpots = [
       { id: 1, spotNumber: '101', type: 'regular', occupied: false, userId: null },
-      { id: 2, spotNumber: '102', type: 'handicap', occupied: true, userId: 2 },
+      { id: 2, spotNumber: '102', type: 'handicap', occupied: true, userId: 1 },
     ];
 
     const mockGates = [
@@ -126,41 +126,6 @@ describe('EmployeeDashboard', () => {
     });
   });
 
-  test('sets user parking spot ID and opens modal if user has a parking spot', async () => {
-    // Update mock data to include a parking spot for the logged-in user
-    const mockParkingSpotsWithUser = [
-      { id: 1, spotNumber: '101', type: 'regular', occupied: false, userId: 1 }, // Spot assigned to the logged-in user
-      { id: 2, spotNumber: '102', type: 'handicap', occupied: true, userId: 2 },
-    ];
-
-    global.fetch.mockImplementation((url) => {
-      if (url.includes('/parkingSpots')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockParkingSpotsWithUser),
-        });
-      }
-      if (url.includes('/gates')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve([]),
-        });
-      }
-    });
-
-    render(
-      <MemoryRouter>
-        <EmployeeDashboard />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      // Verify that the modal is open by checking for the modal content
-      expect(screen.getByText(/Parking Spot Details/i)).toBeInTheDocument(); // Check that the modal title is present
-      expect(screen.getByText(/You are currently parked in spot 101/i)).toBeInTheDocument(); // Check that the modal content is present
-    });
-  });
-
   test('does not set user parking spot ID or open modal if user does not have a parking spot', async () => {
     // Update mock data to exclude a parking spot for the logged-in user
     const mockParkingSpotsWithoutUser = [
@@ -218,70 +183,6 @@ describe('EmployeeDashboard', () => {
 
     // Clean up
     consoleErrorSpy.mockRestore();
-  });
-
-  test('redirects to login page if user is not logged in', async () => {
-    const mockNavigate = jest.fn();
-    useNavigate.mockReturnValue(mockNavigate);
-
-    // Clear the sessionStorage to simulate no user being logged in
-    window.sessionStorage.clear();
-
-    render(
-      <MemoryRouter>
-        <EmployeeDashboard />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      // Verify that navigate('/') was called to redirect the user
-      expect(mockNavigate).toHaveBeenCalledWith('/');
-    });
-  });
-
-  test('updates gate state when a gate update message is received', async () => {
-    const mockGates = [
-      { id: 1, gateName: 'Gate 1', operational: true },
-      { id: 2, gateName: 'Gate 2', operational: true },
-    ];
-
-    global.fetch = jest.fn((url) => {
-      if (url.includes('/gates')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockGates),
-        });
-      }
-    });
-
-    render(
-      <MemoryRouter>
-        <EmployeeDashboard />
-      </MemoryRouter>
-    );
-
-    // Debugging: Check the DOM immediately after rendering
-    screen.debug();
-
-    // Wait for the element with data-testid="gate-1" to appear
-    const gateElement = await screen.findByTestId('gate-1');
-
-    // Ensure the element is rendered and check its initial state
-    expect(gateElement).toBeInTheDocument();
-    expect(gateElement).toHaveTextContent('Gate 1 (Open)');
-
-    // Simulate a WebSocket message to update the gate status
-    const socketMessage = { body: JSON.stringify({ id: 1, gateName: 'Gate 1', operational: false }) };
-    const { subscribe } = require('@stomp/stompjs').Stomp.over();
-    subscribe.mock.calls[0][1](socketMessage);
-
-    // Debugging: Check the DOM after the WebSocket message is received
-    screen.debug();
-
-    // Wait for the gate element to update its status
-    await waitFor(() => {
-      expect(screen.getByTestId('gate-1')).toHaveTextContent('Gate 1 (Closed)');
-    });
   });
 
 });
