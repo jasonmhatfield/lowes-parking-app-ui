@@ -12,7 +12,7 @@ const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handlePar
         <h2 className="modal-title">Parking Spot Details</h2>
         <p data-testid="spot-display">
           {userSpot
-            ? `You are currently parked in spot ${userSpot.number}.`
+            ? `You are currently parked in spot ${userSpot.spotNumber}.`
             : 'You do not have a reserved parking spot.'}
         </p>
         {userSpot && (

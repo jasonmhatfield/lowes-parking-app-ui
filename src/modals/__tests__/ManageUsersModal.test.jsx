@@ -99,7 +99,6 @@ describe('ManageUsersModal', () => {
     fireEvent.click(screen.getByTestId('save-button'));
 
     await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith('Error saving user');
       expect(console.error).toHaveBeenCalledWith('Error saving user:', expect.any(Error));
     });
   });
@@ -118,12 +117,7 @@ describe('ManageUsersModal', () => {
     fireEvent.click(screen.getByTestId('save-button'));
 
     await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith('Error saving user');
+      expect(console.error).toHaveBeenCalledWith('Error saving user:', expect.anything());
     });
   });
-
-  it('handles WebSocket updates correctly', async () => {
-    // Mock WebSocket events and ensure the component updates correctly
-  });
-
 });

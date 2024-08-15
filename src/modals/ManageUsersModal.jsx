@@ -3,7 +3,7 @@ import EditUserModal from './EditUserModal';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import '../styles/modals/ManageUsersModal.css';
-import { fetchUsers, updateUser } from '../services/userService';  // Import the functions
+import { fetchUsers, updateUser } from '../services/userService';
 
 const ManageUsersModal = ({ onClose }) => {
   const [users, setUsers] = useState([]);
@@ -55,7 +55,7 @@ const ManageUsersModal = ({ onClose }) => {
       await loadUsers();
       setShowEditModal(false);
     } catch (error) {
-      console.error('Error updating user');
+      console.error('Error saving user:', error);
     }
   };
 

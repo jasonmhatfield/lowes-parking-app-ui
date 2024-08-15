@@ -5,8 +5,8 @@ import EmployeeParkingModal from '../EmployeeParkingModal';
 describe('EmployeeParkingModal', () => {
   const mockHandleParking = jest.fn();
   const mockParkingSpots = [
-    { id: 101, floor: 1, number: 1 },
-    { id: 102, floor: 1, number: 2 },
+    { id: 101, spotNumber: 1 },
+    { id: 102, spotNumber: 2 },
   ];
 
   const setup = (userParkingSpotId) => {
@@ -37,7 +37,7 @@ describe('EmployeeParkingModal', () => {
 
     fireEvent.click(screen.getByTestId('leave-button'));
 
-    expect(mockHandleParking).toHaveBeenCalledWith({ id: 101, floor: 1, number: 1 });
+    expect(mockHandleParking).toHaveBeenCalledWith({ id: 101, spotNumber: 1 });
   });
 
   test('Leave Spot button is clickable and correctly triggers event', () => {

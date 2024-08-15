@@ -1,186 +1,175 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ManageParkingSpacesModal from '../ManageParkingSpacesModal';
+import * as parkingSpotsService from '../../services/parkingSpotsService';
+
+// Mock the Modal component
+jest.mock('../../components/Modal', () => ({ children, onClose }) => (
+  <div data-testid="modal">
+    {children}
+    <button onClick={onClose} data-testid="close-modal-button">Close Modal</button>
+  </div>
+));
+
+// Mock the Button component
+jest.mock('../../components/Button', () => ({ children, onClick, active, disabled, className }) => (
+  <button onClick={onClick} disabled={disabled} className={className} data-active={active} data-testid={`button-${children.toLowerCase()}`}>
+    {children}
+  </button>
+));
+
+// Mock MUI icons
+jest.mock('@mui/icons-material/DirectionsCar', () => () => <div data-testid="car-icon" />);
+jest.mock('@mui/icons-material/EvStation', () => () => <div data-testid="ev-icon" />);
+jest.mock('@mui/icons-material/Accessible', () => () => <div data-testid="handicap-icon" />);
+jest.mock('@mui/icons-material/LocalParking', () => () => <div data-testid="parking-icon" />);
+
+// Mock parkingSpotsService
+jest.mock('../../services/parkingSpotsService');
 
 describe('ManageParkingSpacesModal', () => {
-  const mockOnClose = jest.fn();
+  const mockParkingSpots = [
+    { id: 1, spotNumber: 'A1', type: 'regular', occupied: false },
+    { id: 2, spotNumber: 'A2', type: 'ev', occupied: true, userId: 1 },
+    { id: 3, spotNumber: 'A3', type: 'handicap', occupied: false },
+    { id: 4, spotNumber: 'A4', type: 'ev', occupied: false },
+  ];
+
+  const mockUserMap = {
+    1: 'John Doe',
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn((url) => {
-      if (url.startsWith('http://localhost:8080/api/users/')) {
-        const userId = url.split('/').pop();
-        return Promise.resolve({
-          json: () =>
-            Promise.resolve({
-              id: userId,
-              firstName: `First${userId}`,
-              lastName: `Last${userId}`,
-            }),
-        });
-      } else if (url.startsWith('http://localhost:8080/api/parkingSpots')) {
-        return Promise.resolve({
-          json: () =>
-            Promise.resolve([
-              { id: '1', spotNumber: '1A', type: 'reserved', status: 'Occupied', userId: '1' },
-              { id: '2', spotNumber: '2B', type: 'general', status: 'Available', userId: '2' },
-              { id: '3', spotNumber: '3C', type: 'ev', status: 'Available' },
-              { id: '4', spotNumber: '4D', type: 'handicap', status: 'Occupied', userId: '2' },
-            ]),
-        });
-      }
+    parkingSpotsService.fetchParkingSpotsData.mockResolvedValue({
+      spotsData: mockParkingSpots,
+      userMapData: mockUserMap,
     });
-
-    // Mock SockJS and Stomp
-    const mockStompClient = {
-      connect: jest.fn((headers, callback) => callback()),
-      subscribe: jest.fn(),
-      disconnect: jest.fn(),
-    };
-
-    global.SockJS = jest.fn().mockImplementation(() => ({}));
-    global.Stomp = {
-      over: jest.fn().mockImplementation(() => mockStompClient),
-    };
-
-    render(<ManageParkingSpacesModal onClose={mockOnClose} />);
-  });
-
-  test('renders the modal with correct title', () => {
-    const title = screen.getByText('Manage Parking Spaces');
-    expect(title).toBeInTheDocument();
-  });
-
-  test('renders filter buttons', () => {
-    expect(screen.getByText('All')).toBeInTheDocument();
-    expect(screen.getByText('Occupied')).toBeInTheDocument();
-    expect(screen.getByText('Available')).toBeInTheDocument();
-  });
-
-  test('close button works correctly', () => {
-    const closeButton = screen.getByText('Close');
-    fireEvent.click(closeButton);
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
-  });
-
-  test('sets parking spots and user map correctly', async () => {
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/parkingSpots');
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/users/1');
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/users/2');
-    });
-
-    // Verify the parking spots are set
-    const spot1 = screen.getByText('1A');
-    const spot2 = screen.getByText('2B');
-    const spot3 = screen.getByText('3C');
-    const spot4 = screen.getByText('4D');
-    expect(spot1).toBeInTheDocument();
-    expect(spot2).toBeInTheDocument();
-    expect(spot3).toBeInTheDocument();
-    expect(spot4).toBeInTheDocument();
-
-    // Verify the user map is set correctly
-    await waitFor(() => {
-      const user1 = screen.getByText('First1 Last1');
-      const user2 = screen.getByText('First2 Last2');
-      expect(user1).toBeInTheDocument();
-      expect(user2).toBeInTheDocument();
+    parkingSpotsService.setupWebSocketConnection.mockImplementation((callback) => {
+      callback(mockParkingSpots[0]);
+      return { disconnect: jest.fn() };
     });
   });
 
-  test('handles WebSocket connections and updates spots correctly', async () => {
-    const mockMessage = {
-      body: JSON.stringify({
-        id: '1',
-        spotNumber: '1A',
-        type: 'reserved',
-        occupied: false,
-        userId: null,
-      }),
-    };
-
-    await waitFor(() => {
-      expect(global.Stomp.over).toHaveBeenCalled();
-      expect(global.SockJS).toHaveBeenCalledWith('http://localhost:8080/ws');
+  test('renders ManageParkingSpacesModal and fetches data', async () => {
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
     });
 
-    const stompClient = global.Stomp.over.mock.results[0].value;
-    expect(stompClient.subscribe).toHaveBeenCalledWith('/topic/parkingSpots', expect.any(Function));
-
-    // Simulate receiving a message from WebSocket
-    const callback = stompClient.subscribe.mock.calls[0][1];
-    callback(mockMessage);
-
-    await waitFor(() => {
-      const spot1 = screen.getByText('1A');
-      expect(spot1).toBeInTheDocument();
-      expect(screen.getByText('Available')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Manage Parking Spaces')).toBeInTheDocument();
+    expect(screen.getByText('A1')).toBeInTheDocument();
+    expect(screen.getByText('A2')).toBeInTheDocument();
+    expect(screen.getByText('A3')).toBeInTheDocument();
+    expect(screen.getByText('A4')).toBeInTheDocument();
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
-  test('handles removing user from a spot', async () => {
-    const spotId = '1';
-    const removeButton = screen.getAllByText('Remove')[0];
+  test('handles WebSocket updates', async () => {
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
 
-    global.fetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ id: spotId, spotNumber: '1A', type: 'reserved', occupied: false, userId: null }),
-      })
-    );
+    expect(parkingSpotsService.setupWebSocketConnection).toHaveBeenCalled();
+  });
 
+  test('filters parking spots', async () => {
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
+
+    fireEvent.click(screen.getByTestId('button-occupied'));
+    expect(screen.queryByText('A1')).not.toBeInTheDocument();
+    expect(screen.getByText('A2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('button-available'));
+    expect(screen.getByText('A1')).toBeInTheDocument();
+    expect(screen.queryByText('A2')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('button-all'));
+    expect(screen.getByText('A1')).toBeInTheDocument();
+    expect(screen.getByText('A2')).toBeInTheDocument();
+  });
+
+  test('removes user from spot', async () => {
+    parkingSpotsService.removeUserFromSpot.mockResolvedValue({ ...mockParkingSpots[1], occupied: false, userId: null });
+
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
+
+    const removeButton = screen.getByText('Remove');
+    await act(async () => {
+      fireEvent.click(removeButton);
+    });
+
+    expect(parkingSpotsService.removeUserFromSpot).toHaveBeenCalledWith(2);
+  });
+
+  test('handles remove user error', async () => {
+    parkingSpotsService.removeUserFromSpot.mockRejectedValue(new Error('Failed to remove user'));
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
+
+    const removeButton = screen.getByText('Remove');
+    await act(async () => {
+      fireEvent.click(removeButton);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error removing user from spot:', expect.any(Error));
+    consoleSpy.mockRestore();
+  });
+
+  test('handles fetch data error', async () => {
+    parkingSpotsService.fetchParkingSpotsData.mockRejectedValue(new Error('Failed to fetch data'));
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error fetching data:', expect.any(Error));
+    consoleSpy.mockRestore();
+  });
+
+  test('closes the modal', async () => {
+    const mockOnClose = jest.fn();
+
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={mockOnClose} />);
+    });
+
+    fireEvent.click(screen.getByTestId('close-modal-button'));
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  test('renders correct icons for different spot types', async () => {
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
+
+    expect(screen.getByTestId('car-icon')).toBeInTheDocument(); // For occupied spot
+    expect(screen.getByTestId('ev-icon')).toBeInTheDocument(); // For EV spot
+    expect(screen.getByTestId('handicap-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('parking-icon')).toBeInTheDocument(); // For regular available spot
+  });
+
+  test('handles updating state', async () => {
+    parkingSpotsService.removeUserFromSpot.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({ ...mockParkingSpots[1], occupied: false, userId: null }), 100)));
+
+    await act(async () => {
+      render(<ManageParkingSpacesModal onClose={() => {}} />);
+    });
+
+    const removeButton = screen.getByText('Remove');
     fireEvent.click(removeButton);
 
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(`http://localhost:8080/api/parkingSpots/${spotId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ occupied: false, userId: null }),
-      });
-      expect(screen.getByText('Available')).toBeInTheDocument();
-    });
-  });
-
-  test('renders correct icons for spot types', () => {
-    const spot1Icon = screen.getByText('1A').nextSibling;
-    const spot3Icon = screen.getByText('3C').nextSibling;
-    const spot4Icon = screen.getByText('4D').nextSibling;
-
-    expect(spot1Icon).toBeInstanceOf(SVGElement); // Default icon (LocalParkingIcon)
-    expect(spot3Icon).toBeInstanceOf(SVGElement); // EV icon (EvStationIcon)
-    expect(spot4Icon).toBeInstanceOf(SVGElement); // Handicap icon (AccessibleIcon)
-  });
-
-  test('filters parking spots correctly', async () => {
-    const occupiedButton = screen.getByText('Occupied');
-    fireEvent.click(occupiedButton);
+    expect(removeButton).toBeDisabled();
 
     await waitFor(() => {
-      expect(screen.getByText('1A')).toBeInTheDocument();
-      expect(screen.getByText('4D')).toBeInTheDocument();
-      expect(screen.queryByText('2B')).not.toBeInTheDocument();
-      expect(screen.queryByText('3C')).not.toBeInTheDocument();
-    });
-
-    const availableButton = screen.getByText('Available');
-    fireEvent.click(availableButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText('1A')).not.toBeInTheDocument();
-      expect(screen.queryByText('4D')).not.toBeInTheDocument();
-      expect(screen.getByText('2B')).toBeInTheDocument();
-      expect(screen.getByText('3C')).toBeInTheDocument();
-    });
-
-    const allButton = screen.getByText('All');
-    fireEvent.click(allButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('1A')).toBeInTheDocument();
-      expect(screen.getByText('2B')).toBeInTheDocument();
-      expect(screen.getByText('3C')).toBeInTheDocument();
-      expect(screen.getByText('4D')).toBeInTheDocument();
+      expect(removeButton).not.toBeInTheDocument();
     });
   });
 });

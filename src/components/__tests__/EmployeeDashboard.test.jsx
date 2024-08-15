@@ -1,188 +1,367 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import EmployeeDashboard from '../EmployeeDashboard';
-import { MemoryRouter } from 'react-router-dom';
+import '@testing-library/jest-dom';
 
-jest.mock('sockjs-client');
-jest.mock('@stomp/stompjs', () => ({
-  Stomp: {
-    over: () => ({
-      connect: (headers, callback) => callback(),
-      subscribe: (topic, callback) => {
-        if (topic === '/topic/gates') {
-          const message = {
-            body: JSON.stringify({ id: 1, gateName: 'Gate 1', operational: false }),
-          };
-          callback(message);
-        }
-      },
-      disconnect: jest.fn(),
-    }),
-  },
-}));
-
+// Mock the react-router-dom's useNavigate hook
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
+  useNavigate: () => jest.fn(),
 }));
 
+// Mock the fetch function
+global.fetch = jest.fn();
+
 describe('EmployeeDashboard', () => {
-  let originalLocation;
-
-  beforeAll(() => {
-    originalLocation = window.location;
-    delete window.location;
-    window.location = {
-      ...originalLocation,
-      assign: jest.fn(),
-      pathname: '/dashboard',
-      href: '',
-      search: '',
-      hash: ''
-    };
-  });
-
   beforeEach(() => {
-    const mockParkingSpots = [
-      { id: 1, spotNumber: '101', type: 'regular', occupied: false, userId: null },
-      { id: 2, spotNumber: '102', type: 'handicap', occupied: true, userId: 1 },
-    ];
-
-    const mockGates = [
-      { id: 1, gateName: 'Gate 1', operational: true },
-      { id: 2, gateName: 'Gate 2', operational: false },
-    ];
-
-    global.fetch = jest.fn((url) => {
-      if (url.includes('/parkingSpots')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockParkingSpots),
-        });
-      }
-      if (url.includes('/gates')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockGates),
-        });
-      }
-    });
-
-    const mockSessionStorage = (() => {
-      let store = {};
-
-      return {
-        getItem: (key) => store[key] || null,
-        setItem: (key, value) => {
-          store[key] = value.toString();
-        },
-        clear: () => {
-          store = {};
-        },
-        removeItem: (key) => {
-          delete store[key];
-        }
-      };
-    })();
-
-    Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
-    window.sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John', hasHandicapPlacard: true, hasEv: true }));
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
   });
 
-  afterAll(() => {
-    window.location = originalLocation;
-  });
+  test('redirects to home if user is not logged in', async () => {
+    const mockNavigate = jest.fn();
+    jest.spyOn(require('react-router-dom'), 'useNavigate').mockImplementation(() => mockNavigate);
 
-  test('renders the EmployeeDashboard with user data', async () => {
-    render(
-      <MemoryRouter>
-        <EmployeeDashboard />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText(/Welcome, John/i)).toBeInTheDocument();
-    expect(screen.getByAltText("Lowe's Logo")).toBeInTheDocument();
-  });
-
-  test('successfully fetches and sets parking spots and gates data', async () => {
-    render(
-      <MemoryRouter>
-        <EmployeeDashboard />
-      </MemoryRouter>
-    );
+    render(<EmployeeDashboard />);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/parkingSpots');
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/gates');
-    });
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /101/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /102/i })).toBeInTheDocument();
+      expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });
 
-  test('does not set user parking spot ID or open modal if user does not have a parking spot', async () => {
-    // Update mock data to exclude a parking spot for the logged-in user
-    const mockParkingSpotsWithoutUser = [
-      { id: 1, spotNumber: '101', type: 'regular', occupied: false, userId: null },
-      { id: 2, spotNumber: '102', type: 'handicap', occupied: true, userId: 2 },
+  test('fetches and displays parking spots and gates', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+      { id: 2, spotNumber: '102', occupied: true, type: 'ev' },
+    ];
+    const mockGates = [
+      { id: 1, gateName: 'Gate A', operational: true },
+      { id: 2, gateName: 'Gate B', operational: false },
     ];
 
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/parkingSpots')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockParkingSpotsWithoutUser),
-        });
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
       }
-      if (url.includes('/gates')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve([]),
-        });
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
       }
     });
 
     render(
-      <MemoryRouter>
+      <BrowserRouter>
         <EmployeeDashboard />
-      </MemoryRouter>
+      </BrowserRouter>
     );
 
     await waitFor(() => {
-      // Verify that the modal does not open by ensuring the modal content is not present
-      expect(screen.queryByText(/Parking Spot Details/i)).not.toBeInTheDocument(); // Modal title should not be present
-      expect(screen.queryByText(/You are currently parked in spot/i)).not.toBeInTheDocument(); // Modal content should not be present
+      expect(screen.getByText('101')).toBeInTheDocument();
+      expect(screen.getByText('102')).toBeInTheDocument();
+      expect(screen.getByText('Gate A (Open)')).toBeInTheDocument();
+      expect(screen.getByText('Gate B (Closed)')).toBeInTheDocument();
     });
   });
 
-  test('handles errors during data fetching', async () => {
-    // Mock fetch to reject and simulate a network error
-    global.fetch.mockImplementation(() =>
-      Promise.reject(new Error('Network error'))
-    );
+  test('handles parking spot selection', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
 
-    // Spy on console.error to check if the error is logged
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        if (url.endsWith('/1')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+        }
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
 
     render(
-      <MemoryRouter>
+      <BrowserRouter>
         <EmployeeDashboard />
-      </MemoryRouter>
+      </BrowserRouter>
     );
 
     await waitFor(() => {
-      // Ensure that console.error was called with the expected error message
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching data:', expect.any(Error));
+      const parkingButton = screen.getByText('101');
+      fireEvent.click(parkingButton);
     });
 
-    // Clean up
-    consoleErrorSpy.mockRestore();
+    expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/parkingSpots/1', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ occupied: true, userId: 1 }),
+    });
   });
 
+  test('handles floor selection', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+      { id: 2, spotNumber: '201', occupied: false, type: 'regular' },
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const floorSelect = screen.getByLabelText('Select Floor');
+      fireEvent.change(floorSelect, { target: { value: '2' } });
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('101')).not.toBeInTheDocument();
+      const spot201 = screen.getByLabelText('Parking spot 201');
+      expect(within(spot201).getByText('201')).toBeInTheDocument();
+    });
+  });
+
+  test('handles logout', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockNavigate = jest.fn();
+    jest.spyOn(require('react-router-dom'), 'useNavigate').mockImplementation(() => mockNavigate);
+
+    global.fetch.mockImplementation(() => Promise.resolve({ json: () => Promise.resolve([]) }));
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const logoutButton = screen.getByText('Logout');
+      fireEvent.click(logoutButton);
+    });
+
+    expect(sessionStorage.getItem('loggedInUser')).toBeNull();
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
+
+  test('displays user parking spot modal', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: true, userId: 1, type: 'regular' }, // Ensure `spotNumber` is used
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Parking Spot Details')).toBeInTheDocument();
+      expect(screen.getByText('You are currently parked in spot 101.')).toBeInTheDocument(); // This should now pass
+    });
+  });
+
+  test('handles fetch error', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    global.fetch.mockRejectedValue(new Error('Fetch error'));
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith('Error fetching data:', expect.any(Error));
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  test('handles parking spot update error', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        if (url.endsWith('/1')) {
+          return Promise.resolve({ ok: false });
+        }
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const parkingButton = screen.getByText('101');
+      fireEvent.click(parkingButton);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to update parking spot.');
+
+    consoleSpy.mockRestore();
+  });
+
+  test('handles different types of parking spots', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John', hasHandicapPlacard: true, hasEv: true }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+      { id: 2, spotNumber: '102', occupied: false, type: 'handicap' },
+      { id: 3, spotNumber: '103', occupied: false, type: 'ev' },
+      { id: 4, spotNumber: '104', occupied: true, userId: 1, type: 'regular' }, // Ensure userId matches logged-in user
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const regularSpot = screen.getByTestId('parking-spot-101');
+      const handicapSpot = screen.getByTestId('parking-spot-102');
+      const evSpot = screen.getByTestId('parking-spot-103');
+      const userSpot = screen.getByTestId('parking-spot-104'); // Now spot 104 is the user's spot
+
+      expect(regularSpot).toHaveClass('ParkingButton blue');
+      expect(handicapSpot).toHaveClass('ParkingButton blue');
+      expect(evSpot).toHaveClass('ParkingButton blue');
+      expect(userSpot).toHaveClass('ParkingButton green'); // Expect green because it is occupied by the user
+    });
+  });
+
+  test('handles leaving a parking spot', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: true, userId: 1, type: 'regular' },
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        if (url.endsWith('/1')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+        }
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const leaveButton = screen.getByTestId('leave-button');
+      fireEvent.click(leaveButton);
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/parkingSpots/1', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ occupied: false, userId: null }),
+    });
+  });
+
+  test('displays gate status correctly', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [];
+    const mockGates = [
+      { id: 1, gateName: 'Gate A', operational: true },
+      { id: 2, gateName: 'Gate B', operational: false },
+    ];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const gateAStatus = screen.getByText('Gate A (Open)');
+      const gateBStatus = screen.getByText('Gate B (Closed)');
+
+      expect(gateAStatus).toBeInTheDocument();
+      expect(gateBStatus).toBeInTheDocument();
+
+      const gateAIcon = gateAStatus.previousSibling;
+      const gateBIcon = gateBStatus.previousSibling;
+
+      expect(gateAIcon).toHaveClass('GateIcon gate-open');
+      expect(gateBIcon).toHaveClass('GateIcon gate-closed');
+    });
+  });
 });
