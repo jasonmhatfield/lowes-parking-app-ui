@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import EditUserModal from './EditUserModal';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
-import './ManageUsersModal.css';
+import '../styles/modals/ManageUsersModal.css';
+import { fetchUsers, updateUser } from '../services/userService';  // Import the functions
 
 const ManageUsersModal = ({ onClose }) => {
   const [users, setUsers] = useState([]);

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
 import Modal from '../components/Modal';
-import '../styles/components/ManageGatesModal.css';
+import '../styles/modals/ManageGatesModal.css';
 
 const fetchGates = async () => {
   const response = await fetch('http://localhost:8080/api/gates');
