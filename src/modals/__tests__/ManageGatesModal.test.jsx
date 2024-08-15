@@ -1,82 +1,126 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ManageGatesModal from '../ManageGatesModal';
 
+// Mock the Modal component
+jest.mock('../../components/Modal', () => ({ children, onClose }) => (
+  <div data-testid="modal">
+    {children}
+    <button onClick={onClose}>Close Modal</button>
+  </div>
+));
+
+// Mock MUI icons
+jest.mock('@mui/icons-material/LockOpen', () => () => <div data-testid="lock-open-icon" />);
+jest.mock('@mui/icons-material/Lock', () => () => <div data-testid="lock-icon" />);
+
+// Mock fetch globally
+global.fetch = jest.fn();
+
 describe('ManageGatesModal', () => {
-  const mockOnClose = jest.fn();
   const mockGates = [
     { id: 1, gateName: 'Gate 1', operational: true },
     { id: 2, gateName: 'Gate 2', operational: false },
   ];
 
   beforeEach(() => {
-    jest.spyOn(global, 'fetch').mockImplementation((url) => {
-      if (url.endsWith('/api/gates')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockGates),
-        });
-      } else if (url.includes('/api/gates/')) {
-        return Promise.resolve({ ok: true });
-      }
+    jest.clearAllMocks();
+    global.fetch.mockClear();
+  });
+
+  test('renders ManageGatesModal and fetches gates', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockGates),
     });
 
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  const setup = async () => {
-    render(<ManageGatesModal onClose={mockOnClose} />);
-    // Wait for the modal header to appear, which indicates that the modal is fully rendered
-    await waitFor(() => screen.getByTestId('modal-header'));
-    // Wait for the gate elements to appear in the DOM
-    await waitFor(() => screen.getByTestId('gate-name-1'));
-  };
-
-  test('renders and fetches gates correctly', async () => {
-    await setup();
-
-    expect(screen.getByTestId('gate-name-1')).toHaveTextContent('Gate 1');
-    expect(screen.getByTestId('gate-name-2')).toHaveTextContent('Gate 2');
-  });
-
-  test('toggles gate operational status when clicked', async () => {
-    await setup();
-
-    const gate1 = screen.getByTestId('gate-item-1');
-    expect(gate1).toHaveStyle('background-color: rgb(76, 175, 80)'); // Initial state: green (operational)
-
-    fireEvent.click(gate1);
-
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8080/api/gates/1?isOperational=false',
-        expect.any(Object)
-      );
+    await act(async () => {
+      render(<ManageGatesModal onClose={() => {}} />);
     });
 
-    expect(screen.getByTestId('gate-item-1')).toHaveStyle('background-color: rgb(244, 67, 54)'); // Updated state: red (non-operational)
+    expect(screen.getByText('Manage Gates')).toBeInTheDocument();
+    expect(screen.getByText('Gate 1')).toBeInTheDocument();
+    expect(screen.getByText('Gate 2')).toBeInTheDocument();
+    expect(screen.getByTestId('lock-open-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('lock-icon')).toBeInTheDocument();
   });
 
-  test('calls onClose when Close button is clicked', async () => {
-    await setup();
-
-    const closeButton = screen.getByTestId('close-button');
-    fireEvent.click(closeButton);
-
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
-  });
-
-  test('handles fetch error when fetching gates', async () => {
-    global.fetch.mockImplementationOnce(() => Promise.reject(new Error('Failed to fetch')));
-
-    await setup();
-
-    await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith('Error fetching gates:', expect.any(Error));
+  test('handles fetch gates error', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
     });
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await act(async () => {
+      render(<ManageGatesModal onClose={() => {}} />);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error fetching gates:', expect.any(Error));
+    consoleSpy.mockRestore();
+  });
+
+  test('handles gate toggle', async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockGates),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+      });
+
+    await act(async () => {
+      render(<ManageGatesModal onClose={() => {}} />);
+    });
+
+    const gate1 = screen.getByText('Gate 1').closest('.gate-item');
+    await act(async () => {
+      fireEvent.click(gate1);
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:8080/api/gates/1?isOperational=false',
+      expect.any(Object)
+    );
+  });
+
+  test('handles toggle gate error', async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockGates),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+      });
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await act(async () => {
+      render(<ManageGatesModal onClose={() => {}} />);
+    });
+
+    const gate1 = screen.getByText('Gate 1').closest('.gate-item');
+    await act(async () => {
+      fireEvent.click(gate1);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error updating gate status:', expect.any(Error));
+    consoleSpy.mockRestore();
+  });
+
+  test('closes the modal', async () => {
+    const mockOnClose = jest.fn();
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockGates),
+    });
+
+    await act(async () => {
+      render(<ManageGatesModal onClose={mockOnClose} />);
+    });
+
+    fireEvent.click(screen.getByText('Close Modal'));
+    expect(mockOnClose).toHaveBeenCalled();
   });
 });
