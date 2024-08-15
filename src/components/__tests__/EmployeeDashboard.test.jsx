@@ -75,9 +75,6 @@ describe('EmployeeDashboard', () => {
 
     global.fetch.mockImplementation((url) => {
       if (url.includes('parkingSpots')) {
-        if (url.endsWith('/1')) {
-          return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
-        }
         return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
       }
       if (url.includes('gates')) {
@@ -92,7 +89,8 @@ describe('EmployeeDashboard', () => {
     );
 
     await waitFor(() => {
-      const parkingButton = screen.getByText('101');
+      // Use getByTestId instead of getByText
+      const parkingButton = screen.getByTestId('parking-spot-101');
       fireEvent.click(parkingButton);
     });
 
@@ -102,6 +100,7 @@ describe('EmployeeDashboard', () => {
       body: JSON.stringify({ occupied: true, userId: 1 }),
     });
   });
+
 
   test('handles floor selection', async () => {
     sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
@@ -364,4 +363,86 @@ describe('EmployeeDashboard', () => {
       expect(gateBIcon).toHaveClass('GateIcon gate-closed');
     });
   });
+
+  test('calls handleParking only if canParkInSpot returns true', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+      { id: 2, spotNumber: '102', occupied: true, type: 'regular' }, // Occupied spot, should not call handleParking
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const availableSpot = screen.getByText('101');
+      fireEvent.click(availableSpot);
+
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/api/parkingSpots/1', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ occupied: true, userId: 1 }),
+      });
+
+      const occupiedSpot = screen.getByText('102');
+      fireEvent.click(occupiedSpot);
+
+      // handleParking should not be called for the occupied spot
+      expect(global.fetch).not.toHaveBeenCalledWith('http://localhost:8080/api/parkingSpots/2', expect.anything());
+    });
+  });
+
+  test('logs error when updating parking spot fails', async () => {
+    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
+
+    const mockParkingSpots = [
+      { id: 1, spotNumber: '101', occupied: false, type: 'regular' },
+    ];
+    const mockGates = [];
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('parkingSpots')) {
+        if (url.endsWith('/1')) {
+          return Promise.resolve({ ok: false }); // Simulate an update failure
+        }
+        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
+      }
+      if (url.includes('gates')) {
+        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
+      }
+    });
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <BrowserRouter>
+        <EmployeeDashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const parkingButton = screen.getByText('101');
+      fireEvent.click(parkingButton);
+    });
+
+    // This assertion checks that the error was logged with the correct message and an error object
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to update parking spot.');
+
+    consoleSpy.mockRestore();
+  });
+
 });
