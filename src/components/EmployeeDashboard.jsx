@@ -35,6 +35,9 @@ const EmployeeDashboard = () => {
         if (userSpot) {
           setUserParkingSpotId(userSpot.id);
           setParkingModalOpen(true);
+        } else {
+          setUserParkingSpotId(null);
+          setParkingModalOpen(false);
         }
       }
     } catch (error) {

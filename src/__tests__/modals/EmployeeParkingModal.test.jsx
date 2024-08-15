@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import EmployeeParkingModal from '../EmployeeParkingModal';
+import EmployeeParkingModal from '../../modals/EmployeeParkingModal';
 
 describe('EmployeeParkingModal', () => {
   const mockHandleParking = jest.fn();

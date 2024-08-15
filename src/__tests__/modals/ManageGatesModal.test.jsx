@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import ManageGatesModal from '../ManageGatesModal';
+import ManageGatesModal from '../../modals/ManageGatesModal';
 
 // Mock the Modal component
 jest.mock('../../components/Modal', () => ({ children, onClose }) => (

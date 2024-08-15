@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import fetchMock from 'jest-fetch-mock';
-import ManageUsersModal from '../ManageUsersModal';
+import ManageUsersModal from '../../modals/ManageUsersModal';
 
 fetchMock.enableMocks();
 

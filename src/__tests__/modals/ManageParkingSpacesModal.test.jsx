@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import ManageParkingSpacesModal from '../ManageParkingSpacesModal';
+import ManageParkingSpacesModal from '../../modals/ManageParkingSpacesModal';
 import * as parkingSpotsService from '../../services/parkingSpotsService';
 
 // Mock the Modal component
@@ -45,10 +45,6 @@ describe('ManageParkingSpacesModal', () => {
       spotsData: mockParkingSpots,
       userMapData: mockUserMap,
     });
-    parkingSpotsService.setupWebSocketConnection.mockImplementation((callback) => {
-      callback(mockParkingSpots[0]);
-      return { disconnect: jest.fn() };
-    });
   });
 
   test('renders ManageParkingSpacesModal and fetches data', async () => {
@@ -62,14 +58,6 @@ describe('ManageParkingSpacesModal', () => {
     expect(screen.getByText('A3')).toBeInTheDocument();
     expect(screen.getByText('A4')).toBeInTheDocument();
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-  });
-
-  test('handles WebSocket updates', async () => {
-    await act(async () => {
-      render(<ManageParkingSpacesModal onClose={() => {}} />);
-    });
-
-    expect(parkingSpotsService.setupWebSocketConnection).toHaveBeenCalled();
   });
 
   test('filters parking spots', async () => {

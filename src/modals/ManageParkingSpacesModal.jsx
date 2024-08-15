@@ -5,10 +5,10 @@ import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
-import { setupWebSocketConnection, fetchParkingSpotsData, removeUserFromSpot } from '../services/parkingSpotsService';
+import { fetchParkingSpotsData, removeUserFromSpot } from '../services/parkingSpotsService';
 import '../styles/components/ManageParkingSpacesModal.css';
 
-const ManageParkingSpacesModal = ({ onClose }) => {
+const ManageParkingSpacesModal = ({ onClose, onUserRemoved }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
   const [userMap, setUserMap] = useState({});
   const [updating, setUpdating] = useState(false);
@@ -27,15 +27,9 @@ const ManageParkingSpacesModal = ({ onClose }) => {
 
     fetchData();
 
-    const stompClient = setupWebSocketConnection((updatedSpot) => {
-      setParkingSpots(prevSpots =>
-        prevSpots.map(spot => (spot.id === updatedSpot.id ? updatedSpot : spot))
-      );
-    });
+    const pollInterval = setInterval(fetchData, 5000);
 
-    return () => {
-      if (stompClient) stompClient.disconnect();
-    };
+    return () => clearInterval(pollInterval);
   }, []);
 
   const handleRemoveUserFromSpot = async (spotId) => {

@@ -1,7 +1,7 @@
 import fetchMock from 'jest-fetch-mock';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import { fetchParkingSpotsData, removeUserFromSpot, setupWebSocketConnection } from '../parkingSpotsService';
+import { fetchParkingSpotsData, removeUserFromSpot, setupWebSocketConnection } from '../../services/parkingSpotsService';
 
 jest.mock('sockjs-client');
 jest.mock('@stomp/stompjs');

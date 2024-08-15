@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import AdminDashboard from '../AdminDashboard';
+import AdminDashboard from '../../components/AdminDashboard';
 
 // Mock the react-router-dom's useNavigate hook
 const mockNavigate = jest.fn();
