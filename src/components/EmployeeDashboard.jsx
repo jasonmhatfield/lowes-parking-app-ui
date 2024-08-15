@@ -16,7 +16,9 @@ const EmployeeDashboard = () => {
   const [userParkingSpotId, setUserParkingSpotId] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState('1');
   const [parkingModalOpen, setParkingModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    return sessionStorage.getItem('viewMode') === 'mobile';
+  });
   const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
@@ -54,6 +56,11 @@ const EmployeeDashboard = () => {
       return;
     }
     setUser(loggedInUser);
+
+    // Ensure the component uses the correct view mode on mount
+    const savedViewMode = sessionStorage.getItem('viewMode');
+    setIsMobile(savedViewMode === 'mobile');
+
     fetchData();
     const pollInterval = setInterval(fetchData, 5000);
 
@@ -115,22 +122,22 @@ const EmployeeDashboard = () => {
       .filter((spot) => spot.spotNumber.startsWith(selectedFloor))
       .sort((a, b) => parseInt(a.spotNumber) - parseInt(b.spotNumber));
 
+  const availableParkingSpots = filteredParkingSpots().filter(spot => !spot.occupied && canParkInSpot(spot));
+
   const toggleViewMode = () => {
     const newMode = !isMobile;
     setIsMobile(newMode);
     sessionStorage.setItem('viewMode', newMode ? 'mobile' : 'desktop');
   };
 
-  const availableParkingSpots = filteredParkingSpots().filter(spot => !spot.occupied && canParkInSpot(spot));
-
   return (
     <div className={`DashboardContainer ${isMobile ? 'mobile' : ''}`}>
-      <button className="ViewToggle" onClick={toggleViewMode}>
-        {isMobile ? <FaDesktop /> : <FaMobileAlt />}
+      <button className = "ViewToggle" data-testid = "view-toggle" onClick = {toggleViewMode}>
+        {isMobile ? <FaDesktop/> : <FaMobileAlt/>}
       </button>
-      <div className="ContentWrapper">
-        <header className="Header">
-          <img src={LowesLogo} alt="Lowe's Logo" className="Logo" />
+      <div className = "ContentWrapper">
+        <header className = "Header">
+        <img src={LowesLogo} alt="Lowe's Logo" className="Logo" />
           {user && <h1 className="WelcomeMessage">Welcome, {user.firstName}</h1>}
         </header>
 
@@ -153,6 +160,7 @@ const EmployeeDashboard = () => {
             <div className="ParkingListContainer">
               {availableParkingSpots.length > 0 ? (
                 <div className="ParkingList">
+
                   {availableParkingSpots.map((spot) => (
                     <button
                       key={spot.id}
