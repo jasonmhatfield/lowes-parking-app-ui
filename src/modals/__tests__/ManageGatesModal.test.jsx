@@ -21,37 +21,36 @@ describe('ManageGatesModal', () => {
       }
     });
 
-    jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error to avoid cluttering the test output
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  const setup = () => {
+  const setup = async () => {
     render(<ManageGatesModal onClose={mockOnClose} />);
+    // Wait for the modal header to appear, which indicates that the modal is fully rendered
+    await waitFor(() => screen.getByTestId('modal-header'));
+    // Wait for the gate elements to appear in the DOM
+    await waitFor(() => screen.getByTestId('gate-name-1'));
   };
 
   test('renders and fetches gates correctly', async () => {
-    setup();
+    await setup();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('gate-name-1')).toHaveTextContent('Gate 1');
-      expect(screen.getByTestId('gate-name-2')).toHaveTextContent('Gate 2');
-    });
+    expect(screen.getByTestId('gate-name-1')).toHaveTextContent('Gate 1');
+    expect(screen.getByTestId('gate-name-2')).toHaveTextContent('Gate 2');
   });
 
   test('toggles gate operational status when clicked', async () => {
-    setup();
+    await setup();
 
-    // Initial state check
-    const gate1 = await screen.findByTestId('gate-item-1');
+    const gate1 = screen.getByTestId('gate-item-1');
     expect(gate1).toHaveStyle('background-color: rgb(76, 175, 80)'); // Initial state: green (operational)
 
-    // Trigger toggle
     fireEvent.click(gate1);
 
-    // Wait for the state to update and re-render
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         'http://localhost:8080/api/gates/1?isOperational=false',
@@ -59,14 +58,11 @@ describe('ManageGatesModal', () => {
       );
     });
 
-    // Verify the updated state
-    await waitFor(() => {
-      expect(screen.getByTestId('gate-item-1')).toHaveStyle('background-color: rgb(244, 67, 54)'); // Updated state: red (non-operational)
-    });
+    expect(screen.getByTestId('gate-item-1')).toHaveStyle('background-color: rgb(244, 67, 54)'); // Updated state: red (non-operational)
   });
 
   test('calls onClose when Close button is clicked', async () => {
-    setup();
+    await setup();
 
     const closeButton = screen.getByTestId('close-button');
     fireEvent.click(closeButton);
@@ -75,10 +71,9 @@ describe('ManageGatesModal', () => {
   });
 
   test('handles fetch error when fetching gates', async () => {
-    // Simulate a fetch failure
     global.fetch.mockImplementationOnce(() => Promise.reject(new Error('Failed to fetch')));
 
-    setup();
+    await setup();
 
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith('Error fetching gates:', expect.any(Error));

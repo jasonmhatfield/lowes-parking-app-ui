@@ -5,9 +5,8 @@ import AccessibleIcon from '@mui/icons-material/Accessible';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
-import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
-import styled from 'styled-components';
+import { setupWebSocketConnection, fetchParkingSpotsData, removeUserFromSpot } from '../services/parkingSpotsService';
+import '../styles/components/ManageParkingSpacesModal.css';
 
 const ManageParkingSpacesModal = ({ onClose }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
@@ -18,15 +17,9 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const parkingSpotsResponse = await fetch('http://localhost:8080/api/parkingSpots');
-        const parkingSpotsData = await parkingSpotsResponse.json();
-        setParkingSpots(parkingSpotsData);
-
-        const userIds = [...new Set(parkingSpotsData.filter(spot => spot.userId).map(spot => spot.userId))];
-        const userResponses = await Promise.all(userIds.map(id => fetch(`http://localhost:8080/api/users/${id}`)));
-        const users = await Promise.all(userResponses.map(res => res.json()));
-        const userMap = users.reduce((map, user) => ({ ...map, [user.id]: `${user.firstName} ${user.lastName}` }), {});
-        setUserMap(userMap);
+        const { spotsData, userMapData } = await fetchParkingSpotsData();
+        setParkingSpots(spotsData);
+        setUserMap(userMapData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -34,16 +27,10 @@ const ManageParkingSpacesModal = ({ onClose }) => {
 
     fetchData();
 
-    const socket = new SockJS('http://localhost:8080/ws');
-    const stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, () => {
-      stompClient.subscribe('/topic/parkingSpots', (message) => {
-        const updatedSpot = JSON.parse(message.body);
-        setParkingSpots(prevSpots =>
-          prevSpots.map(spot => (spot.id === updatedSpot.id ? updatedSpot : spot))
-        );
-      });
+    const stompClient = setupWebSocketConnection((updatedSpot) => {
+      setParkingSpots(prevSpots =>
+        prevSpots.map(spot => (spot.id === updatedSpot.id ? updatedSpot : spot))
+      );
     });
 
     return () => {
@@ -54,18 +41,8 @@ const ManageParkingSpacesModal = ({ onClose }) => {
   const handleRemoveUserFromSpot = async (spotId) => {
     setUpdating(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/parkingSpots/${spotId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ occupied: false, userId: null }),
-      });
-
-      if (response.ok) {
-        const updatedSpot = await response.json();
-        setParkingSpots(parkingSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s)));
-      } else {
-        console.error('Error removing user from spot.');
-      }
+      const updatedSpot = await removeUserFromSpot(spotId);
+      setParkingSpots(parkingSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s)));
     } catch (error) {
       console.error('Error removing user from spot:', error);
     } finally {
@@ -94,16 +71,16 @@ const ManageParkingSpacesModal = ({ onClose }) => {
 
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
-      <ModalContent>
-        <ModalHeader id="modal-title">Manage Parking Spaces</ModalHeader>
-        <ModalBody>
-          <FilterButtons>
+      <div className="modal-content">
+        <div className="modal-header" id="modal-title">Manage Parking Spaces</div>
+        <div className="modal-body">
+          <div className="filter-buttons">
             <Button onClick={() => setFilter('all')} active={filter === 'all'}>All</Button>
             <Button onClick={() => setFilter('occupied')} active={filter === 'occupied'}>Occupied</Button>
             <Button onClick={() => setFilter('available')} active={filter === 'available'}>Available</Button>
-          </FilterButtons>
-          <ParkingTableContainer>
-            <ParkingTable>
+          </div>
+          <div className="parking-table-container">
+            <table className="parking-table">
               <thead>
               <tr>
                 <th>Spot Number</th>
@@ -119,122 +96,30 @@ const ManageParkingSpacesModal = ({ onClose }) => {
                   <td>{spot.spotNumber}</td>
                   <td>{getIconForSpot(spot)}</td>
                   <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
-                  <td className="fixed-width">{spot.userId ? userMap[spot.userId] : ''}</td>
-                  <td className="fixed-width">
+                  <td>{spot.userId ? userMap[spot.userId] : ''}</td>
+                  <td>
                     {spot.occupied && (
-                      <SmallButton
+                      <Button
                         onClick={() => handleRemoveUserFromSpot(spot.id)}
                         disabled={updating}
+                        className="small-button"
                       >
                         Remove
-                      </SmallButton>
+                      </Button>
                     )}
                   </td>
                 </tr>
               ))}
               </tbody>
-            </ParkingTable>
-          </ParkingTableContainer>
-        </ModalBody>
-        <ModalFooter>
+            </table>
+          </div>
+        </div>
+        <div className="modal-footer">
           <Button onClick={onClose}>Close</Button>
-        </ModalFooter>
-      </ModalContent>
+        </div>
+      </div>
     </Modal>
   );
 };
-
-const ModalContent = styled.div`
-    background-color: #1e1e2f;
-    padding: 20px;
-    border-radius: 12px;
-    width: 700px;
-    max-height: 80vh;
-    overflow: hidden;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-`;
-
-const ModalHeader = styled.div`
-    font-size: 1.8rem;
-    color: #ffffff;
-    text-align: center;
-    margin-bottom: 20px;
-`;
-
-const ModalBody = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-y: auto;
-    width: 100%;
-    height: 60vh;
-`;
-
-const FilterButtons = styled.div`
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 15px;
-
-    & > button {
-        flex: 1;
-        margin-right: 10px;
-    }
-
-    & > button:last-child {
-        margin-right: 0;
-    }
-`;
-
-const ParkingTableContainer = styled.div`
-    width: 100%;
-    overflow-x: auto;
-`;
-
-const ParkingTable = styled.table`
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #252525;
-    border-radius: 8px;
-    overflow: hidden;
-
-    th, td {
-        padding: 10px;
-        text-align: center;
-        color: #ffffff;
-        white-space: nowrap;
-    }
-
-    th {
-        background-color: #33334d;
-    }
-
-    td {
-        background-color: #1e1e2f;
-    }
-
-    tr:nth-child(even) td {
-        background-color: #2a2a3b;
-    }
-
-    tr:hover td {
-        background-color: #3a3a4d;
-    }
-`;
-
-const ModalFooter = styled.div`
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-`;
-
-const SmallButton = styled(Button)`
-    padding: 6px 12px;
-    font-size: 0.875rem;
-    min-width: unset;
-    background-color: #f44336;
-`;
 
 export default ManageParkingSpacesModal;
