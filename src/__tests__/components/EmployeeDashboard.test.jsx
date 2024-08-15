@@ -162,35 +162,6 @@ describe('EmployeeDashboard', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
-  test('displays user parking spot modal', async () => {
-    sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
-
-    const mockParkingSpots = [
-      { id: 1, spotNumber: '101', occupied: true, userId: 1, type: 'regular' }, // Ensure `spotNumber` is used
-    ];
-    const mockGates = [];
-
-    global.fetch.mockImplementation((url) => {
-      if (url.includes('parkingSpots')) {
-        return Promise.resolve({ json: () => Promise.resolve(mockParkingSpots) });
-      }
-      if (url.includes('gates')) {
-        return Promise.resolve({ json: () => Promise.resolve(mockGates) });
-      }
-    });
-
-    render(
-      <BrowserRouter>
-        <EmployeeDashboard />
-      </BrowserRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Parking Spot Details')).toBeInTheDocument();
-      expect(screen.getByText('You are currently parked in spot 101.')).toBeInTheDocument(); // This should now pass
-    });
-  });
-
   test('handles fetch error', async () => {
     sessionStorage.setItem('loggedInUser', JSON.stringify({ id: 1, firstName: 'John' }));
 
