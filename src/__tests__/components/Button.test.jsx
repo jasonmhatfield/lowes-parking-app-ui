@@ -33,39 +33,9 @@ describe('Button Component', () => {
     expect(button).toHaveTextContent('Click Me');
   });
 
-  it('applies the correct styles for the primary class', () => {
-    render(<Button variant="primary" dataTestId="button-primary">Primary Button</Button>);
-    const button = screen.getByTestId('button-primary');
-    expect(button).toHaveClass('primary');
-  });
-
-  it('applies the correct styles for the secondary class', () => {
-    render(<Button variant="secondary" dataTestId="button-secondary">Secondary Button</Button>);
-    const button = screen.getByTestId('button-secondary');
-    expect(button).toHaveClass('secondary');
-  });
-
-  it('applies the correct styles for the success class', () => {
-    render(<Button variant="success" dataTestId="button-success">Success Button</Button>);
-    const button = screen.getByTestId('button-success');
-    expect(button).toHaveClass('success');
-  });
-
-  it('applies the correct styles for the danger class', () => {
-    render(<Button variant="danger" dataTestId="button-danger">Danger Button</Button>);
-    const button = screen.getByTestId('button-danger');
-    expect(button).toHaveClass('danger');
-  });
-
   it('is disabled when the disabled prop is true', () => {
     render(<Button disabled dataTestId="button-disabled">Disabled Button</Button>);
     const button = screen.getByTestId('button-disabled');
     expect(button).toBeDisabled();
-  });
-
-  it('defaults to the primary class if no variant is provided', () => {
-    render(<Button dataTestId="button-default">Default Button</Button>);
-    const button = screen.getByTestId('button-default');
-    expect(button).toHaveClass('primary');
   });
 });

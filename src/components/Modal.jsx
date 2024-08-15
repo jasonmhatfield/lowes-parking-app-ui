@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 
-const Modal = ({ open, onClose, children }) => {
+const Modal = ({ open, children }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
@@ -21,12 +21,10 @@ const Modal = ({ open, onClose, children }) => {
     <ModalOverlay
       data-testid="modal-overlay"
       shouldAnimate={shouldAnimate}
-      onClick={onClose}
     >
       <ModalContent
         data-testid="modal-content"
         shouldAnimate={shouldAnimate}
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

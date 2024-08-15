@@ -6,7 +6,6 @@ import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import { fetchParkingSpotsData, removeUserFromSpot } from '../services/parkingSpotsService';
-import '../styles/components/ManageParkingSpacesModal.css';
 
 const ManageParkingSpacesModal = ({ onClose, onUserRemoved }) => {
   const [parkingSpots, setParkingSpots] = useState([]);
@@ -65,38 +64,62 @@ const ManageParkingSpacesModal = ({ onClose, onUserRemoved }) => {
 
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
-      <div className="modal-content">
-        <div className="modal-header" id="modal-title">Manage Parking Spaces</div>
-        <div className="modal-body">
-          <div className="filter-buttons">
-            <Button onClick={() => setFilter('all')} active={filter === 'all'}>All</Button>
-            <Button onClick={() => setFilter('occupied')} active={filter === 'occupied'}>Occupied</Button>
-            <Button onClick={() => setFilter('available')} active={filter === 'available'}>Available</Button>
+      <div style={styles.modalContent}>
+        <div id="modal-title" style={styles.modalHeader}>Manage Parking Spaces</div>
+        <div style={styles.modalBody}>
+          <div style={styles.filterButtons}>
+            <Button
+              onClick={() => setFilter('all')}
+              style={{
+                ...styles.button,
+                ...(filter === 'all' && styles.activeButton)
+              }}
+            >
+              All
+            </Button>
+            <Button
+              onClick={() => setFilter('occupied')}
+              style={{
+                ...styles.button,
+                ...(filter === 'occupied' && styles.activeButton)
+              }}
+            >
+              Occupied
+            </Button>
+            <Button
+              onClick={() => setFilter('available')}
+              style={{
+                ...styles.button,
+                ...(filter === 'available' && styles.activeButton)
+              }}
+            >
+              Available
+            </Button>
           </div>
-          <div className="parking-table-container">
-            <table className="parking-table">
+          <div style={styles.parkingTableContainer}>
+            <table style={styles.parkingTable}>
               <thead>
               <tr>
-                <th>Spot Number</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Employee</th>
-                <th>Action</th>
+                <th style={styles.tableCell}>Spot Number</th>
+                <th style={styles.tableCell}>Type</th>
+                <th style={styles.tableCell}>Status</th>
+                <th style={styles.tableCell}>Employee</th>
+                <th style={styles.tableCell}>Action</th>
               </tr>
               </thead>
               <tbody>
               {filteredParkingSpots.map(spot => (
                 <tr key={spot.id}>
-                  <td>{spot.spotNumber}</td>
-                  <td>{getIconForSpot(spot)}</td>
-                  <td>{spot.occupied ? 'Occupied' : 'Available'}</td>
-                  <td>{spot.userId ? userMap[spot.userId] : ''}</td>
-                  <td>
+                  <td style={styles.tableCell}>{spot.spotNumber}</td>
+                  <td style={styles.tableCell}>{getIconForSpot(spot)}</td>
+                  <td style={styles.tableCell}>{spot.occupied ? 'Occupied' : 'Available'}</td>
+                  <td style={styles.tableCell}>{spot.userId ? userMap[spot.userId] : ''}</td>
+                  <td style={styles.tableCell}>
                     {spot.occupied && (
                       <Button
                         onClick={() => handleRemoveUserFromSpot(spot.id)}
                         disabled={updating}
-                        className="small-button"
+                        style={styles.smallButton}
                       >
                         Remove
                       </Button>
@@ -108,12 +131,90 @@ const ManageParkingSpacesModal = ({ onClose, onUserRemoved }) => {
             </table>
           </div>
         </div>
-        <div className="modal-footer">
+        <div style={styles.modalFooter}>
           <Button onClick={onClose}>Close</Button>
         </div>
       </div>
     </Modal>
   );
+};
+
+const styles = {
+  modalContent: {
+    backgroundColor: '#1e1e2f',
+    padding: '20px',
+    borderRadius: '12px',
+    width: '700px',
+    maxHeight: '80vh',
+    overflow: 'hidden',
+    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  modalHeader: {
+    fontSize: '1.8rem',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: '20px',
+  },
+  modalBody: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    overflowY: 'auto',
+    width: '100%',
+    height: '60vh',
+  },
+  filterButtons: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: '15px',
+  },
+  button: {
+    flex: 1,
+    padding: '10px',
+    margin: '0 10px',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    color: '#ffffff',
+    backgroundColor: '#1976D2',
+    border: 'none',
+    cursor: 'pointer',
+    textAlign: 'center',
+    transition: 'background-color 0.3s ease, transform 0.3s ease',
+  },
+  activeButton: {
+    backgroundColor: '#4242aa',
+  },
+  parkingTableContainer: {
+    width: '100%',
+    overflowX: 'auto',
+  },
+  parkingTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    backgroundColor: '#252525',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  },
+  tableCell: {
+    padding: '10px',
+    textAlign: 'center',
+    color: '#ffffff',
+    whiteSpace: 'nowrap',
+  },
+  modalFooter: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '20px',
+  },
+  smallButton: {
+    padding: '6px 12px',
+    fontSize: '0.875rem',
+    minWidth: 'unset',
+    backgroundColor: '#f44336',
+  },
 };
 
 export default ManageParkingSpacesModal;
