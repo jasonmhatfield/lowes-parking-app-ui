@@ -3,12 +3,12 @@ import { FaParking, FaCar } from 'react-icons/fa';
 import Modal from '../components/Modal';
 
 const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handleParking, isMobile }) => {
-  const userSpot = parkingSpots.find((spot) => spot.id === userParkingSpotId);
+  const userSpot = parkingSpots.find((spot) => spot.id === userParkingSpotId); // Find user's parking spot
 
   const getFloorAndSpot = (spotNumber) => {
     const floor = Math.floor(spotNumber / 100);
     const spot = spotNumber % 100;
-    return { floor, spot };
+    return { floor, spot }; // Extract floor and spot number from spotNumber
   };
 
   const userSpotDetails = userSpot ? getFloorAndSpot(userSpot.spotNumber) : null;
@@ -16,31 +16,31 @@ const EmployeeParkingModal = ({ open, userParkingSpotId, parkingSpots, handlePar
   return (
     <Modal open={open} isMobile={isMobile}>
       <h2 style={styles.modalTitle}>
-        <FaParking style={styles.icon} /> Parking Spot Details
+        <FaParking style={styles.icon} /> Parking Spot Details {/* Display parking spot details */}
       </h2>
       <div style={styles.detailsContainer}>
         {userSpotDetails ? (
           <>
             <div style={styles.parkingMap}>
               <div style={styles.mapPlaceholder}>
-                <FaCar style={styles.carIcon} />
-                <span style={styles.floorText}>Floor {userSpotDetails.floor}</span>
+                <FaCar style={styles.carIcon} /> {/* Display car icon */}
+                <span style={styles.floorText}>Floor {userSpotDetails.floor}</span> {/* Display floor number */}
               </div>
               <div style={styles.spotNumber}>
-                Spot {userSpotDetails.spot}
+                Spot {userSpotDetails.spot} {/* Display spot number */}
               </div>
             </div>
           </>
         ) : (
           <p style={styles.noSpotText}>You do not have a reserved parking spot.</p>
-        )}
+          )} {/* Message for no reserved spot */}
       </div>
       {userSpot && (
         <div style={styles.buttonContainer}>
           <button
             style={styles.modalButton}
             data-testid="leave-button"
-            onClick={() => handleParking(userSpot)}
+            onClick={() => handleParking(userSpot)} // Handle leaving the spot
           >
             Leave Spot
           </button>
@@ -68,7 +68,7 @@ const styles = {
   },
   icon: {
     marginRight: '10px',
-    color: '#0072ce',
+    color: '#0072ce', // Icon color
   },
   floorText: {
     fontSize: '1.2rem',
@@ -99,7 +99,7 @@ const styles = {
   },
   carIcon: {
     fontSize: '2.5rem',
-    color: '#0072ce',
+    color: '#0072ce', // Car icon color
     marginBottom: '5px',
   },
   spotNumber: {
@@ -121,7 +121,7 @@ const styles = {
     justifyContent: 'center',
   },
   modalButton: {
-    backgroundColor: '#0072ce',
+    backgroundColor: '#0072ce', // Button background color
     color: 'white',
     border: 'none',
     padding: '12px 25px',

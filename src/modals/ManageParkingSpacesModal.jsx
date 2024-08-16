@@ -7,59 +7,59 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import { fetchParkingSpotsData, removeUserFromSpot } from '../services/parkingSpotsService';
 
-const ManageParkingSpacesModal = ({ onClose, onUserRemoved }) => {
-  const [parkingSpots, setParkingSpots] = useState([]);
-  const [userMap, setUserMap] = useState({});
-  const [updating, setUpdating] = useState(false);
-  const [filter, setFilter] = useState('all');
+const ManageParkingSpacesModal = ({ onClose }) => {
+  const [parkingSpots, setParkingSpots] = useState([]); // State to hold the list of parking spots
+  const [userMap, setUserMap] = useState({}); // State to map user IDs to user names
+  const [updating, setUpdating] = useState(false); // State to track update status
+  const [filter, setFilter] = useState('all'); // State to hold the current filter
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { spotsData, userMapData } = await fetchParkingSpotsData();
-        setParkingSpots(spotsData);
-        setUserMap(userMapData);
+        const { spotsData, userMapData } = await fetchParkingSpotsData(); // Fetch parking spots and user data
+        setParkingSpots(spotsData); // Set the fetched parking spots
+        setUserMap(userMapData); // Set the user map data
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    fetchData();
+    fetchData(); // Fetch data on component mount
 
-    const pollInterval = setInterval(fetchData, 5000);
+    const pollInterval = setInterval(fetchData, 5000); // Poll data every 5 seconds
 
-    return () => clearInterval(pollInterval);
+    return () => clearInterval(pollInterval); // Clean up interval on component unmount
   }, []);
 
   const handleRemoveUserFromSpot = async (spotId) => {
-    setUpdating(true);
+    setUpdating(true); // Set updating to true when the operation starts
     try {
-      const updatedSpot = await removeUserFromSpot(spotId);
-      setParkingSpots(parkingSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s)));
+      const updatedSpot = await removeUserFromSpot(spotId); // Remove user from the selected spot
+      setParkingSpots(parkingSpots.map(s => (s.id === updatedSpot.id ? updatedSpot : s))); // Update the spot in state
     } catch (error) {
       console.error('Error removing user from spot:', error);
     } finally {
-      setUpdating(false);
+      setUpdating(false); // Reset updating state
     }
   };
 
   const getIconForSpot = (spot) => {
     const iconStyle = { fontSize: '1.5rem', zIndex: 2 };
-    if (spot.occupied) return <DirectionsCarIcon style={{ ...iconStyle, color: '#FF5722' }} />;
+    if (spot.occupied) return <DirectionsCarIcon style={{ ...iconStyle, color: '#FF5722' }} />; // Show car icon if spot is occupied
     switch (spot.type) {
       case 'ev':
-        return <EvStationIcon style={{ ...iconStyle, color: '#4CAF50' }} />;
+        return <EvStationIcon style={{ ...iconStyle, color: '#4CAF50' }} />; // Show EV icon for EV spots
       case 'handicap':
-        return <AccessibleIcon style={{ ...iconStyle, color: '#FFFFFF' }} />;
+        return <AccessibleIcon style={{ ...iconStyle, color: '#FFFFFF' }} />; // Show handicap icon for handicap spots
       default:
-        return <LocalParkingIcon style={{ ...iconStyle, color: '#9E9E9E' }} />;
+        return <LocalParkingIcon style={{ ...iconStyle, color: '#9E9E9E' }} />; // Show default parking icon for regular spots
     }
   };
 
   const filteredParkingSpots = parkingSpots.filter(spot => {
-    if (filter === 'occupied') return spot.occupied;
-    if (filter === 'available') return !spot.occupied;
-    return true;
+    if (filter === 'occupied') return spot.occupied; // Filter by occupied spots
+    if (filter === 'available') return !spot.occupied; // Filter by available spots
+    return true; // Default to showing all spots
   });
 
   return (
@@ -132,7 +132,7 @@ const ManageParkingSpacesModal = ({ onClose, onUserRemoved }) => {
           </div>
         </div>
         <div style={styles.modalFooter}>
-          <Button onClick={onClose}>Close</Button>
+          <Button onClick={onClose}>Close</Button> {/* Button to close the modal */}
         </div>
       </div>
     </Modal>

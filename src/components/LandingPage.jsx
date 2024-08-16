@@ -5,49 +5,48 @@ import LowesLogo from '../assets/lowes-logo.png';
 import { FaMobileAlt, FaDesktop } from 'react-icons/fa';
 
 const LandingPage = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]); // State to store the list of users
+  const [loading, setLoading] = useState(true); // State to track loading status
   const [isMobile, setIsMobile] = useState(() => {
     const savedViewMode = sessionStorage.getItem('viewMode');
-    return savedViewMode === 'mobile';
+    return savedViewMode === 'mobile'; // State to track whether the view is mobile
   });
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook to navigate between routes
 
   const fetchUsers = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/users');
       const data = await response.json();
-      setUsers(data);
-      setLoading(false);
+      setUsers(data); // Set the fetched users in state
+      setLoading(false); // Set loading to false once data is fetched
     } catch (error) {
       console.error('Error fetching users:', error);
-      setLoading(false);
+      setLoading(false); // Set loading to false even if there's an error
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(); // Fetch users when the component mounts
   }, []);
 
   const handleLogin = (user) => {
-    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+    sessionStorage.setItem('loggedInUser', JSON.stringify(user)); // Store the logged-in user in session storage
     if (user.role === 'admin') {
-      navigate('/admin-dashboard');
+      navigate('/admin-dashboard'); // Navigate to admin dashboard if user is an admin
     } else {
-      navigate('/employee-dashboard');
+      navigate('/employee-dashboard'); // Navigate to employee dashboard if user is not an admin
     }
   };
 
   const filteredUsers = users.filter(
     (user) => isMobile ? ['Mark', 'Emily'].includes(user.firstName) : ['Admin', 'Mark', 'Emily'].includes(user.firstName)
-  );
+  ); // Filter users based on view mode (mobile or desktop)
 
   const toggleViewMode = () => {
     const newMode = !isMobile;
-    setIsMobile(newMode);
-    sessionStorage.setItem('viewMode', newMode ? 'mobile' : 'desktop');
+    setIsMobile(newMode); // Toggle between mobile and desktop views
+    sessionStorage.setItem('viewMode', newMode ? 'mobile' : 'desktop'); // Save the new view mode
   };
-
 
   return (
     <DashboardContainer className={isMobile ? 'mobile' : ''} data-testid="landing-page">
@@ -57,24 +56,23 @@ const LandingPage = () => {
       <ContentWrapper>
         <Header>
           <Logo src={LowesLogo} alt="Lowe's Logo" data-testid="lowes-logo" />
-          <WelcomeMessage>Welcome to Lowe's Parking Management</WelcomeMessage>
+          <WelcomeMessage>Welcome to Lowe's Parking Management</WelcomeMessage> {/* Display welcome message */}
         </Header>
 
         <MainContent>
           <LoginSection>
             <SectionTitle>Select a User to Login</SectionTitle>
             {loading ? (
-              <LoadingMessage data-testid="loading-message">Loading users...</LoadingMessage>
+              <LoadingMessage data-testid="loading-message">Loading users...</LoadingMessage> // Show loading message
             ) : (
               <LoginButtons>
                 {filteredUsers.map((user) => (
                   <LoginButton
                     key={user.id}
-                    /* istanbul ignore next */
                     onClick={() => handleLogin(user)}
                     data-testid={`login-button-${user.firstName.toLowerCase()}`}
                   >
-                    {user.firstName} {user.lastName}
+                    {user.firstName} {user.lastName} {/* Display user names */}
                   </LoginButton>
                 ))}
               </LoginButtons>
@@ -83,7 +81,7 @@ const LandingPage = () => {
         </MainContent>
 
         <BottomSection>
-          <Subtitle>Manage your parking efficiently and effortlessly.</Subtitle>
+          <Subtitle>Manage your parking efficiently and effortlessly.</Subtitle> {/* Display subtitle */}
         </BottomSection>
       </ContentWrapper>
     </DashboardContainer>

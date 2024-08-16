@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 
 const Modal = ({ open, children, overlayStyle }) => {
-  const [isMounted, setIsMounted] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // State to track if the modal is mounted
+  const [shouldAnimate, setShouldAnimate] = useState(false); // State to control animation
 
   useEffect(() => {
     if (open) {
-      setIsMounted(true);
-      setTimeout(() => setShouldAnimate(true), 10);
+      setIsMounted(true); // Mount the modal when open is true
+      setTimeout(() => setShouldAnimate(true), 10); // Start animation after a short delay
     } else {
-      setShouldAnimate(false);
-      setTimeout(() => setIsMounted(false), 600);
+      setShouldAnimate(false); // Stop animation when closing
+      setTimeout(() => setIsMounted(false), 600); // Unmount modal after animation completes
     }
   }, [open]);
 
-  if (!isMounted) return null;
+  if (!isMounted) return null; // Return null if modal is not mounted
 
   return (
     <ModalOverlay
@@ -31,7 +31,7 @@ const Modal = ({ open, children, overlayStyle }) => {
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
-        {children}
+        {children} {/* Render modal children */}
       </ModalContent>
     </ModalOverlay>
   );
@@ -65,7 +65,7 @@ const ModalOverlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);  /* Default background */
+    background: rgba(0, 0, 0, 0.3);  /* Overlay background */
     display: ${({ shouldAnimate }) => (shouldAnimate ? 'flex' : 'none')};
     justify-content: center;
     align-items: center;
@@ -77,7 +77,7 @@ const ModalOverlay = styled.div`
                     `
                     : css`
                         ${fadeOut} 600ms ease-in-out forwards
-                    `};
+                    `}; /* Apply fade in/out animation */
 `;
 
 const ModalContent = styled.div`
@@ -92,7 +92,7 @@ const ModalContent = styled.div`
                     `
                     : css`
                         ${fadeOut} 600ms ease-in-out forwards
-                    `};
+                    `}; /* Apply fade in/out animation */
 `;
 
 export default Modal;

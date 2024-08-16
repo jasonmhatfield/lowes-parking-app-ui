@@ -6,13 +6,13 @@ import AddUserModal from '../modals/AddUserModal';
 import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  const [showGatesModal, setShowGatesModal] = useState(false);
-  const [showParkingSpacesModal, setShowParkingSpacesModal] = useState(false);
-  const [showUsersModal, setShowUsersModal] = useState(false);
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const navigate = useNavigate();
+  const [showGatesModal, setShowGatesModal] = useState(false); // State to control ManageGatesModal visibility
+  const [showParkingSpacesModal, setShowParkingSpacesModal] = useState(false); // State to control ManageParkingSpacesModal visibility
+  const [showUsersModal, setShowUsersModal] = useState(false); // State to control ManageUsersModal visibility
+  const [showAddUserModal, setShowAddUserModal] = useState(false); // State to control AddUserModal visibility
+  const navigate = useNavigate(); // Hook to navigate between routes
 
-  const handleLogout = () => navigate('/');
+  const handleLogout = () => navigate('/'); // Redirect to the home page on logout
 
   const handleAddUser = async (newUser) => {
     try {
@@ -23,7 +23,7 @@ const AdminDashboard = () => {
       });
 
       if (response.ok) {
-        setShowAddUserModal(false);
+        setShowAddUserModal(false); // Close modal if user is added successfully
       } else {
         console.error('Error adding user');
       }
@@ -38,17 +38,17 @@ const AdminDashboard = () => {
         <h1 style={styles.title}>Admin Dashboard</h1>
 
         <div style={styles.dashboardActions}>
-          <button style={styles.actionButton} onClick={() => setShowGatesModal(true)}>Manage Gates</button>
-          <button style={styles.actionButton} onClick={() => setShowParkingSpacesModal(true)}>Manage Parking Spaces</button>
-          <button style={styles.actionButton} onClick={() => setShowUsersModal(true)}>Manage Users</button>
-          <button style={styles.actionButton} onClick={() => setShowAddUserModal(true)}>Add User</button>
-          <button style={styles.logoutButton} onClick={handleLogout}>Logout</button>
+          <button style={styles.actionButton} onClick={() => setShowGatesModal(true)}>Manage Gates</button> {/* Show ManageGatesModal */}
+          <button style={styles.actionButton} onClick={() => setShowParkingSpacesModal(true)}>Manage Parking Spaces</button> {/* Show ManageParkingSpacesModal */}
+          <button style={styles.actionButton} onClick={() => setShowUsersModal(true)}>Manage Users</button> {/* Show ManageUsersModal */}
+          <button style={styles.actionButton} onClick={() => setShowAddUserModal(true)}>Add User</button> {/* Show AddUserModal */}
+          <button style={styles.logoutButton} onClick={handleLogout}>Logout</button> {/* Handle user logout */}
         </div>
 
-        {showGatesModal && <ManageGatesModal onClose={() => setShowGatesModal(false)} />}
-        {showParkingSpacesModal && <ManageParkingSpacesModal onClose={() => setShowParkingSpacesModal(false)} />}
-        {showUsersModal && <ManageUsersModal onClose={() => setShowUsersModal(false)} />}
-        {showAddUserModal && <AddUserModal onClose={() => setShowAddUserModal(false)} onSave={handleAddUser} />}
+        {showGatesModal && <ManageGatesModal onClose={() => setShowGatesModal(false)} />} {/* Conditional rendering of ManageGatesModal */}
+        {showParkingSpacesModal && <ManageParkingSpacesModal onClose={() => setShowParkingSpacesModal(false)} />} {/* Conditional rendering of ManageParkingSpacesModal */}
+        {showUsersModal && <ManageUsersModal onClose={() => setShowUsersModal(false)} />} {/* Conditional rendering of ManageUsersModal */}
+        {showAddUserModal && <AddUserModal onClose={() => setShowAddUserModal(false)} onSave={handleAddUser} />} {/* Conditional rendering of AddUserModal */}
       </div>
     </div>
   );
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
 
 const styles = {
   wrapper: {
-    display: 'flex',
+    display: 'flex', // Centers the content
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
