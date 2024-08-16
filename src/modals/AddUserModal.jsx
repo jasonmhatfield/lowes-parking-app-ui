@@ -13,19 +13,19 @@ const AddUserModal = ({ onClose, onSave }) => {
     hasHandicapPlacard: false,
     hasEv: false,
     role: 'employee',
-  });
+  }); // State to hold new user details
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewUser({ ...newUser, [name]: value });
+    setNewUser({ ...newUser, [name]: value }); // Update user details based on input changes
   };
 
   const handleToggle = (field) => {
-    setNewUser({ ...newUser, [field]: !newUser[field] });
+    setNewUser({ ...newUser, [field]: !newUser[field] }); // Toggle boolean fields (hasHandicapPlacard, hasEv)
   };
 
   const handleSave = async () => {
-    await onSave(newUser);
+    await onSave(newUser); // Trigger save action for the new user
   };
 
   return (
@@ -70,7 +70,7 @@ const AddUserModal = ({ onClose, onSave }) => {
               onClick={() => handleToggle('hasHandicapPlacard')}
               className={newUser.hasHandicapPlacard ? 'active' : ''}
             >
-              <AccessibleIcon />
+              <AccessibleIcon /> {/* Handicap icon toggle button */}
             </ToggleButton>
             <ToggleButton
               data-testid="ev-toggle"
@@ -78,7 +78,7 @@ const AddUserModal = ({ onClose, onSave }) => {
               onClick={() => handleToggle('hasEv')}
               className={newUser.hasEv ? 'active' : ''}
             >
-              <EvStationIcon />
+              <EvStationIcon /> {/* EV icon toggle button */}
             </ToggleButton>
           </ToggleGroup>
         </ModalBody>

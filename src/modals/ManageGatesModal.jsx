@@ -9,7 +9,7 @@ const fetchGates = async () => {
   if (!response.ok) {
     throw new Error('Failed to fetch gates');
   }
-  return await response.json();
+  return await response.json(); // Return the fetched gates data
 };
 
 const toggleGateStatus = async (id, currentStatus) => {
@@ -23,26 +23,26 @@ const toggleGateStatus = async (id, currentStatus) => {
 };
 
 const ManageGatesModal = ({ onClose }) => {
-  const [gates, setGates] = useState([]);
+  const [gates, setGates] = useState([]); // State to hold the list of gates
 
   useEffect(() => {
     const loadGates = async () => {
       try {
-        const data = await fetchGates();
-        setGates(data);
+        const data = await fetchGates(); // Fetch gates data on component mount
+        setGates(data); // Set the fetched gates data
       } catch (error) {
         console.error('Error fetching gates:', error);
       }
     };
-    loadGates();
+    loadGates(); // Call the function to load gates
   }, []);
 
   const handleGateToggle = async (id, currentStatus) => {
     try {
-      await toggleGateStatus(id, currentStatus);
+      await toggleGateStatus(id, currentStatus); // Toggle the gate's operational status
       setGates(gates =>
         gates.map(gate => gate.id === id ? { ...gate, operational: !currentStatus } : gate)
-      );
+      ); // Update the gate's status in state
     } catch (error) {
       console.error('Error updating gate status:', error);
     }
@@ -59,15 +59,15 @@ const ManageGatesModal = ({ onClose }) => {
               className={`gate-item ${gate.operational ? 'operational' : 'not-operational'}`}
               onClick={() => handleGateToggle(gate.id, gate.operational)}
             >
-              <span className="gate-name">{gate.gateName}</span>
+              <span className="gate-name">{gate.gateName}</span> {/* Display gate name */}
               <div className="gate-icon">
-                {gate.operational ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />}
+                {gate.operational ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />} {/* Display appropriate icon based on gate status */}
               </div>
             </div>
           ))}
         </div>
         <div className="modal-footer">
-          <button onClick={onClose} className="close-button">Close</button>
+          <button onClick={onClose} className="close-button">Close</button> {/* Button to close the modal */}
         </div>
       </div>
     </Modal>

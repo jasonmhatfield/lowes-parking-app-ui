@@ -6,27 +6,27 @@ import Button from '../components/Button';
 import styled from 'styled-components';
 
 const EditUserModal = ({ user, onClose, onSave }) => {
-  const [editedUser, setEditedUser] = useState({ ...user });
-  const [saving, setSaving] = useState(false);
+  const [editedUser, setEditedUser] = useState({ ...user }); // State to hold the edited user details
+  const [saving, setSaving] = useState(false); // State to track saving status
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditedUser({ ...editedUser, [name]: value });
+    setEditedUser({ ...editedUser, [name]: value }); // Update user details based on input changes
   };
 
   const handleToggle = (field) => {
-    setEditedUser({ ...editedUser, [field]: !editedUser[field] });
+    setEditedUser({ ...editedUser, [field]: !editedUser[field] }); // Toggle boolean fields (hasHandicapPlacard, hasEv)
   };
 
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true); // Set saving to true when save starts
     try {
-      await onSave(editedUser);
-      setSaving(false);
-      onClose();
+      await onSave(editedUser); // Trigger save action for the edited user
+      setSaving(false); // Reset saving state once save is complete
+      onClose(); // Close the modal after saving
     } catch (error) {
       console.error('Error saving user:', error);
-      setSaving(false);
+      setSaving(false); // Reset saving state in case of an error
     }
   };
 
@@ -71,14 +71,14 @@ const EditUserModal = ({ user, onClose, onSave }) => {
               active={editedUser.hasHandicapPlacard}
               onClick={() => handleToggle('hasHandicapPlacard')}
             >
-              <AccessibleIcon />
+              <AccessibleIcon /> {/* Handicap icon toggle button */}
             </ToggleButton>
             <ToggleButton
               data-testid="ev-toggle"
               active={editedUser.hasEv}
               onClick={() => handleToggle('hasEv')}
             >
-              <EvStationIcon />
+              <EvStationIcon /> {/* EV icon toggle button */}
             </ToggleButton>
           </ToggleGroup>
         </ModalBody>

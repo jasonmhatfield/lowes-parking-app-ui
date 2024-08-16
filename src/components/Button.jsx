@@ -31,7 +31,7 @@ const styles = {
     color: 'white',
   },
   primary: {
-    backgroundColor: '#0072ce',
+    backgroundColor: '#0072ce', // Primary button background color
   },
   primaryHover: {
     backgroundColor: '#00509e',
@@ -42,7 +42,7 @@ const styles = {
     transform: 'translateY(0)',
   },
   secondary: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#6c757d', // Secondary button background color
   },
   secondaryHover: {
     backgroundColor: '#5a6268',
@@ -53,7 +53,7 @@ const styles = {
     transform: 'translateY(0)',
   },
   success: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#28a745', // Success button background color
   },
   successHover: {
     backgroundColor: '#218838',
@@ -64,7 +64,7 @@ const styles = {
     transform: 'translateY(0)',
   },
   danger: {
-    backgroundColor: '#dc3545',
+    backgroundColor: '#dc3545', // Danger button background color
   },
   dangerHover: {
     backgroundColor: '#c82333',
@@ -75,7 +75,7 @@ const styles = {
     transform: 'translateY(0)',
   },
   disabled: {
-    backgroundColor: '#cccccc',
+    backgroundColor: '#cccccc', // Disabled button background color
     cursor: 'not-allowed',
     transform: 'none',
   },
